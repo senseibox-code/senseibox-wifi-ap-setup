@@ -19,7 +19,7 @@ from starlette.responses import FileResponse, JSONResponse
 from starlette.routing import Mount, Route
 from starlette.staticfiles import StaticFiles
 
-from .ap import AccessPointSettings, DEFAULT_STATE_DIR
+from .ap import DEFAULT_STATE_DIR
 from .network import NetworkManagerClient
 from .service import WifiSetupService
 
@@ -95,6 +95,7 @@ async def api_status(request: Request) -> JSONResponse:
         payload["state"] = service.state.name
         payload["ap_interface"] = service.state.ap_interface.name if service.state.ap_interface else None
         payload["last_error"] = service.state.last_error
+        payload["setup_timeout_seconds"] = service.state.setup_deadline_seconds
     return JSONResponse(payload)
 
 
@@ -128,7 +129,7 @@ async def api_configure_wifi(request: Request) -> JSONResponse:
         network_manager: NetworkManagerClient = request.app.state.network_manager
         interface = service.state.ap_interface or network_manager.select_ap_interface()
         if interface is not None:
-            service.ap_manager.stop(interface.name)
+            service.stop_setup_mode()
         service.state.name = "connecting_to_wifi"
         LOGGER.info("Wi-Fi credentials submitted; attempting connection to selected network.")
         connected = network_manager.connect_wifi(ssid, password, interface.name if interface else None)
@@ -138,9 +139,7 @@ async def api_configure_wifi(request: Request) -> JSONResponse:
             LOGGER.warning("Wi-Fi connection attempt failed; restarting setup AP mode.")
             if interface is not None:
                 try:
-                    service.ap_manager.start(interface, AccessPointSettings.from_environment())
-                    service.state.ap_interface = interface
-                    service.state.name = "ap_running"
+                    service.restart_setup_mode(interface)
                 except Exception:
                     LOGGER.exception("Failed to restart setup AP mode after Wi-Fi failure.")
             return JSONResponse({"saved": False, "connected": False, "error": "Unable to connect to Wi-Fi."}, status_code=502)
@@ -190,13 +189,22 @@ def main() -> None:
     parser.add_argument("--boot", action="store_true", help="Exit if networking is already healthy.")
     parser.add_argument("--web-only", action="store_true", help="Run only the web app without AP setup control.")
     parser.add_argument("--state-dir", default=str(DEFAULT_STATE_DIR))
+    parser.add_argument(
+        "--setup-timeout-seconds",
+        default=int(os.environ.get("SENSEIBOX_SETUP_TIMEOUT_SECONDS", "600")),
+        type=int,
+        help="Seconds to keep AP setup mode running before shutting it down.",
+    )
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
 
     app_instance = app
     if not args.web_only:
-        service = WifiSetupService(state_dir=Path(args.state_dir))
+        service = WifiSetupService(
+            state_dir=Path(args.state_dir),
+            setup_timeout_seconds=args.setup_timeout_seconds,
+        )
         if args.boot and service.networking_healthy():
             return
         service.prepare_setup_mode()

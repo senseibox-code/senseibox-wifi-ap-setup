@@ -338,6 +338,8 @@ The service should not block normal boot longer than necessary.
 
 The service should continue to run as `senseibox:senseibox`. Network operations that need elevated privileges should use a narrowly bounded systemd capability set rather than running the whole service as root.
 
+Setup AP mode must have a configurable session timeout. The default timeout is 10 minutes. If setup is not completed before the timeout, the service must stop AP mode, restore NetworkManager ownership of the Wi-Fi interface, log the timeout, and exit cleanly.
+
 ## Manual Recovery
 
 Users need a way to force setup mode again.
@@ -466,6 +468,7 @@ The installer and systemd unit must follow Senseibox conventions:
 - NetworkManager does not manage the selected Wi-Fi interface while `hostapd` owns it.
 - The service generates `hostapd` config with the selected interface, setup SSID, setup password, country code, channel, and WPA settings.
 - Setup AP mode defaults to 2.4 GHz.
+- Setup AP mode shuts down after the configured timeout when setup is not completed.
 - Setup AP mode is isolated and does not create a bridge interface.
 - Existing Wi-Fi profiles are not deleted until replacement credentials succeed.
 - Failed connection attempts return the device to AP setup mode.

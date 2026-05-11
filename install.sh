@@ -81,6 +81,7 @@ if [ ! -f "${ENV_FILE}" ]; then
     echo "SENSEIBOX_AP_SSID=\"Senseibox Setup\""
     echo "SENSEIBOX_AP_COUNTRY=\"GB\""
     echo "SENSEIBOX_AP_CHANNEL=\"6\""
+    echo "SENSEIBOX_SETUP_TIMEOUT_SECONDS=\"600\""
   } >"${ENV_FILE}"
 fi
 

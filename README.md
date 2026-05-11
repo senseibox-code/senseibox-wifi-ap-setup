@@ -20,6 +20,12 @@ sudoedit /etc/senseibox/senseibox-wifi-ap-mode
 
 The installer creates this file with the required variable names commented out so product-specific network values are not baked into the repository.
 
+Setup AP mode shuts down automatically if setup is not completed. The default timeout is 10 minutes and can be changed in `/etc/senseibox/senseibox-wifi-ap-mode`:
+
+```sh
+SENSEIBOX_SETUP_TIMEOUT_SECONDS="600"
+```
+
 The setup page listens on port `8080`:
 
 ```text
