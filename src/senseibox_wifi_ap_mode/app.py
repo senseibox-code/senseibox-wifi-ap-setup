@@ -20,6 +20,7 @@ from starlette.routing import Mount, Route
 from starlette.staticfiles import StaticFiles
 
 from .ap_mode import DEFAULT_STATE_DIR
+from .fake_network import FakeNetworkManagerClient
 from .network import NetworkManagerClient
 from .service import WifiSetupService
 
@@ -125,31 +126,37 @@ async def api_configure_wifi(request: Request) -> JSONResponse:
 
     store: WifiConfigStore = request.app.state.config_store
     if request.app.state.connect_on_submit:
-        service: WifiSetupService = request.app.state.setup_service
-        network_manager: NetworkManagerClient = request.app.state.network_manager
-        interface = service.state.ap_interface or network_manager.select_ap_interface()
-        if interface is not None:
+        service: WifiSetupService | None = request.app.state.setup_service
+        network_manager: NetworkManagerClient | FakeNetworkManagerClient = request.app.state.network_manager
+        interface = service.state.ap_interface if service is not None else None
+        if interface is None:
+            interface = network_manager.select_ap_interface()
+        if service is not None and interface is not None:
             service.stop_setup_mode()
-        service.state.name = "connecting_to_wifi"
+        if service is not None:
+            service.state.name = "connecting_to_wifi"
         LOGGER.info("Wi-Fi credentials submitted; attempting connection to selected network.")
         connected = network_manager.connect_wifi(ssid, password, interface.name if interface else None)
         if not connected:
-            service.state.name = "wifi_failure"
-            service.state.last_error = "Wi-Fi connection attempt failed."
+            if service is not None:
+                service.state.name = "wifi_failure"
+                service.state.last_error = "Wi-Fi connection attempt failed."
             LOGGER.warning("Wi-Fi connection attempt failed; restarting setup AP mode.")
-            if interface is not None:
+            if service is not None and interface is not None:
                 try:
                     service.restart_setup_mode(interface)
                 except Exception:
                     LOGGER.exception("Failed to restart setup AP mode after Wi-Fi failure.")
             return JSONResponse({"saved": False, "connected": False, "error": "Unable to connect to Wi-Fi."}, status_code=502)
-        service.state.name = "setup_complete"
+        if service is not None:
+            service.state.name = "setup_complete"
 
     store.write(ssid, password)
     payload: dict[str, bool] = {"saved": True}
     if request.app.state.connect_on_submit:
         payload["connected"] = True
-        return JSONResponse(payload, background=BackgroundTask(_exit_after_response))
+        if request.app.state.exit_on_connect:
+            return JSONResponse(payload, background=BackgroundTask(_exit_after_response))
     return JSONResponse(payload)
 
 
@@ -159,6 +166,7 @@ def create_app(
     network_manager: NetworkManagerClient | None = None,
     setup_service: WifiSetupService | None = None,
     connect_on_submit: bool = False,
+    exit_on_connect: bool = False,
 ) -> Starlette:
     app = Starlette(
         debug=False,
@@ -175,6 +183,7 @@ def create_app(
     app.state.network_manager = network_manager or NetworkManagerClient()
     app.state.setup_service = setup_service
     app.state.connect_on_submit = connect_on_submit
+    app.state.exit_on_connect = exit_on_connect
     return app
 
 
@@ -188,6 +197,11 @@ def main() -> None:
     parser.add_argument("--reload", action="store_true")
     parser.add_argument("--boot", action="store_true", help="Exit if networking is already healthy.")
     parser.add_argument("--web-only", action="store_true", help="Run only the web app without AP setup control.")
+    parser.add_argument(
+        "--fake-network",
+        action="store_true",
+        help="Use fake Wi-Fi scan and connect results without NetworkManager or AP hardware.",
+    )
     parser.add_argument("--state-dir", default=str(DEFAULT_STATE_DIR))
     parser.add_argument(
         "--setup-timeout-seconds",
@@ -200,7 +214,13 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
 
     app_instance = app
-    if not args.web_only:
+    if args.fake_network:
+        LOGGER.info("Using fake Wi-Fi data; NetworkManager, hostapd, and dnsmasq will not be controlled.")
+        app_instance = create_app(
+            network_manager=FakeNetworkManagerClient(),
+            connect_on_submit=True,
+        )
+    elif not args.web_only:
         service = WifiSetupService(
             state_dir=Path(args.state_dir),
             setup_timeout_seconds=args.setup_timeout_seconds,
@@ -212,6 +232,7 @@ def main() -> None:
             setup_service=service,
             network_manager=service.network_manager,
             connect_on_submit=True,
+            exit_on_connect=True,
         )
 
     uvicorn.run(

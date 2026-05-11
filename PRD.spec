@@ -456,6 +456,14 @@ The installer and systemd unit must follow Senseibox conventions:
 - Install required Debian runtime packages, including `python3`, `python3-venv`, `rsync`, `network-manager`, `hostapd`, `dnsmasq`, and Wi-Fi/network utility packages needed by the service.
 - Create `/etc/senseibox/senseibox-wifi-ap-mode` for deployment-specific AP settings that should not be hardcoded into the repository.
 
+For development on machines without NetworkManager Wi-Fi hardware, the app must support a fake network mode:
+
+```bash
+sudo /opt/senseibox/senseibox-wifi-ap-mode/.venv/bin/senseibox-wifi-ap-mode --host 0.0.0.0 --port 8080 --fake-network
+```
+
+Fake network mode must serve realistic Wi-Fi scan data and exercise the web setup flow without starting AP mode, changing NetworkManager state, or controlling `hostapd`/`dnsmasq`.
+
 ## Acceptance Criteria
 
 - On boot with usable Ethernet LAN access, the service exits without starting AP mode.
@@ -478,6 +486,7 @@ The installer and systemd unit must follow Senseibox conventions:
 - Logs contain useful state transitions and never include passwords.
 - The systemd service runs as `senseibox:senseibox`.
 - The systemd service grants only the bounded capabilities needed for AP networking.
+- `--fake-network` runs the web setup flow with fake Wi-Fi data on development machines that do not have compatible Wi-Fi hardware.
 - Installation works from both a source checkout and from the target install directory itself.
 
 ## Open Decisions

@@ -101,3 +101,15 @@ For local development without AP control:
 ```sh
 senseibox-wifi-ap-mode --web-only --host 127.0.0.1 --port 8080
 ```
+
+For development on machines without NetworkManager Wi-Fi hardware, run with fake Wi-Fi scan and connect data. This keeps the web flow testable without starting AP mode or touching Linux networking services:
+
+```sh
+sudo /opt/senseibox/senseibox-wifi-ap-mode/.venv/bin/senseibox-wifi-ap-mode --host 0.0.0.0 --port 8080 --fake-network
+```
+
+In a local checkout, use the same flag with your editable install:
+
+```sh
+senseibox-wifi-ap-mode --host 127.0.0.1 --port 8080 --fake-network
+```

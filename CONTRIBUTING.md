@@ -10,10 +10,10 @@ Before opening a pull request, please take a few minutes to read these guideline
 python -m venv .venv
 . .venv/bin/activate
 pip install -e ".[dev]"
-senseibox-wifi-ap-mode --web-only --reload
+senseibox-wifi-ap-mode --host 127.0.0.1 --port 8080 --fake-network
 ```
 
-Use `--web-only` for local UI and API work. Full AP mode uses Linux networking tools such as NetworkManager, `iw`, `hostapd`, and `dnsmasq`, so it should be tested on Linux hardware or a suitable Linux VM.
+Use `--fake-network` for local UI and API work on machines without NetworkManager Wi-Fi hardware. It serves realistic Wi-Fi scan data and fake connection results without starting AP mode or touching NetworkManager, `hostapd`, or `dnsmasq`. Full AP mode still needs Linux hardware or a suitable Linux VM.
 
 The app is intentionally small:
 
@@ -35,7 +35,7 @@ node --check static/setup.js
 bash -n install.sh
 ```
 
-When changing AP mode, Wi-Fi scanning, NetworkManager handoff, or `hostapd`/`dnsmasq` behavior, also test on Linux hardware whenever possible. macOS can run the unit tests and web-only mode, but it cannot validate the real AP lifecycle.
+When changing AP mode, Wi-Fi scanning, NetworkManager handoff, or `hostapd`/`dnsmasq` behavior, also test on Linux hardware whenever possible. macOS can run the unit tests and fake network mode, but it cannot validate the real AP lifecycle.
 
 ## Hardware and Networking Notes
 
