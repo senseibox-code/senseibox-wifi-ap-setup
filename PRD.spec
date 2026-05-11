@@ -140,6 +140,8 @@ Open AP mode is acceptable only for prototypes and local development. Production
 
 ## Setup Page Requirements
 
+Before implementing or substantially changing the web app UI, ask the product owner for the current designs. The setup page should reuse Senseibox KPI app UI code, styling conventions, and interaction patterns where practical because the Wi-Fi setup UI is expected to look similar.
+
 The setup page must show:
 
 - Senseibox name.
@@ -365,6 +367,7 @@ The installer and systemd unit must follow Senseibox conventions:
 
 ## Open Decisions
 
+- Final web app designs for the setup flow.
 - Whether production AP passwords are label-printed or device-specific.
 - Exact setup gateway address and DHCP range values.
 - Exact local LAN reachability check.
