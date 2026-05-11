@@ -348,6 +348,7 @@ The installer and systemd unit must follow Senseibox conventions:
 - Run as the no-login `senseibox:senseibox` service account.
 - Use a virtualenv under `/opt/senseibox/senseibox-wifi-ap-mode/.venv`.
 - Install the tracked systemd unit from `systemd/senseibox-wifi-ap-mode.service`.
+- Install required Debian runtime packages, including `python3`, `python3-venv`, `rsync`, `network-manager`, `hostapd`, `dnsmasq`, and Wi-Fi/network utility packages needed by the service.
 
 ## Acceptance Criteria
 

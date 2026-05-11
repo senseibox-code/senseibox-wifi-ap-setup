@@ -10,6 +10,8 @@ sudo ./install.sh
 
 The installer deploys the app to `/opt/senseibox/senseibox-wifi-ap-mode`, creates or reuses the shared no-login `senseibox:senseibox` service account, installs a virtualenv under `/opt/senseibox/senseibox-wifi-ap-mode/.venv`, and starts the `senseibox-wifi-ap-mode` systemd service.
 
+It also installs the Debian runtime packages required for Wi-Fi setup and AP mode, including NetworkManager, `hostapd`, `dnsmasq`, Python venv support, `rsync`, and Wi-Fi/network utility packages.
+
 The setup page listens on port `8080`:
 
 ```text

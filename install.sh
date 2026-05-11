@@ -8,11 +8,37 @@ SERVICE_GROUP="senseibox"
 INSTALL_ROOT="/opt/senseibox"
 INSTALL_DIR="${INSTALL_ROOT}/${APP_NAME}"
 SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
+DEBIAN_PACKAGES=(
+  ca-certificates
+  curl
+  dnsutils
+  dnsmasq
+  hostapd
+  iproute2
+  iputils-ping
+  iw
+  network-manager
+  python3
+  python3-venv
+  rfkill
+  rsync
+  wireless-tools
+  wpasupplicant
+)
 
 if [ "$(id -u)" -ne 0 ]; then
   echo "Run this installer with sudo: sudo ./install.sh" >&2
   exit 1
 fi
+
+if ! command -v apt-get >/dev/null 2>&1; then
+  echo "apt-get is required to install Debian runtime packages." >&2
+  exit 1
+fi
+
+echo "Installing Debian runtime packages"
+apt-get update
+DEBIAN_FRONTEND=noninteractive apt-get install -y "${DEBIAN_PACKAGES[@]}"
 
 if ! command -v python3 >/dev/null 2>&1; then
   echo "python3 is required but was not found." >&2
