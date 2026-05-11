@@ -32,7 +32,7 @@
         </section>
 
         <section class="screen" data-screen="select" aria-labelledby="select-title">
-          <button class="icon-button back-button" data-back="welcome" type="button" aria-label="Back">‹</button>
+          <button class="icon-button back-button" data-back="welcome" type="button" aria-label="Back"></button>
 
           <div class="screen-heading">
             <h1 id="select-title">Choose a network</h1>
@@ -45,13 +45,10 @@
           <p class="network-helper" id="network-helper"></p>
 
           <form id="wifi-form" autocomplete="on">
-            <label for="ssid">Network name</label>
-            <input id="ssid" name="ssid" autocomplete="off" required />
-
             <label for="password">Password</label>
             <div class="password-field">
               <input id="password" name="password" type="password" autocomplete="current-password" minlength="8" required />
-              <button class="icon-button" id="toggle-password" type="button" aria-label="Show password">◉</button>
+              <button class="icon-button" id="toggle-password" type="button" aria-label="Show password"></button>
             </div>
 
             <button class="primary-action" type="submit">Connect</button>
@@ -60,7 +57,7 @@
         </section>
 
         <section class="screen" data-screen="connecting" aria-labelledby="connecting-title">
-          <button class="icon-button back-button" data-back="select" type="button" aria-label="Back">‹</button>
+          <button class="icon-button back-button" data-back="select" type="button" aria-label="Back"></button>
 
           <div class="screen-heading">
             <h1 id="connecting-title">Connecting</h1>
@@ -69,7 +66,7 @@
 
           <ol class="progress-list" aria-label="Connection progress">
             <li class="progress-step progress-complete">
-              <span class="progress-dot">✓</span>
+              <span class="progress-dot progress-check"></span>
               <span>
                 <strong>Saving</strong>
                 <small>Wi-Fi credentials saved</small>
@@ -92,7 +89,7 @@
           </ol>
 
           <div class="notice">
-            <span aria-hidden="true">ⓘ</span>
+            <span class="info-icon" aria-hidden="true"></span>
             <span>Your phone may disconnect briefly.</span>
           </div>
         </section>
@@ -102,7 +99,9 @@
             <img class="brand-logo" src="/static/assets/logo_dark.png" alt="Senseibox" />
           </div>
 
-          <div class="hero-icon success-icon" aria-hidden="true">✓</div>
+          <div class="hero-icon success-icon" aria-hidden="true">
+            <span class="success-check"></span>
+          </div>
 
           <div class="copy-block">
             <h1 id="success-title">Connected</h1>
@@ -110,7 +109,7 @@
           </div>
 
           <a class="dashboard-link" href="http://senseibox.local">
-            <span aria-hidden="true">◎</span>
+            <span class="globe-icon" aria-hidden="true"></span>
             <span>Open: <strong>senseibox.local</strong></span>
           </a>
 

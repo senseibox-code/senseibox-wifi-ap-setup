@@ -181,7 +181,6 @@ a {
 
 .success-icon {
   border-radius: 26px;
-  font-size: 5rem;
   height: 140px;
   margin-top: 102px;
   width: 140px;
@@ -194,6 +193,14 @@ a {
   height: 72px;
   position: absolute;
   width: 72px;
+}
+
+.success-check {
+  border-bottom: 5px solid var(--blue);
+  border-left: 5px solid var(--blue);
+  height: 22px;
+  transform: translateY(-4px) rotate(-45deg);
+  width: 44px;
 }
 
 .copy-block,
@@ -257,12 +264,20 @@ p {
 }
 
 .back-button {
-  font-size: 2.1rem;
   height: 40px;
   left: 42px;
   position: absolute;
   top: 66px;
   width: 40px;
+}
+
+.back-button::before {
+  border-bottom: 2px solid currentColor;
+  border-left: 2px solid currentColor;
+  content: "";
+  height: 14px;
+  transform: rotate(45deg);
+  width: 14px;
 }
 
 .screen-heading {
@@ -335,9 +350,73 @@ p {
   text-align: center;
 }
 
+.network-icon {
+  background: radial-gradient(circle at 50% 88%, currentColor 0 2px, transparent 2.5px);
+  height: 20px;
+  position: relative;
+  width: 22px;
+}
+
+.network-icon::before,
+.network-icon::after {
+  border-color: currentColor transparent transparent;
+  border-radius: 50%;
+  border-style: solid;
+  content: "";
+  left: 50%;
+  position: absolute;
+  transform: translateX(-50%);
+}
+
+.network-icon::before {
+  border-width: 2px;
+  height: 18px;
+  top: 2px;
+  width: 22px;
+}
+
+.network-icon::after {
+  border-width: 2px;
+  height: 12px;
+  top: 8px;
+  width: 14px;
+}
+
 .network-selected .network-icon,
 .selected-check {
   color: var(--blue);
+}
+
+.network-lock {
+  display: block;
+  height: 20px;
+  position: relative;
+  width: 18px;
+}
+
+.network-lock::before {
+  border: 2px solid currentColor;
+  border-bottom: 0;
+  border-radius: 7px 7px 0 0;
+  content: "";
+  height: 8px;
+  left: 50%;
+  position: absolute;
+  top: 2px;
+  transform: translateX(-50%);
+  width: 10px;
+}
+
+.network-lock::after {
+  background: currentColor;
+  border-radius: 2px;
+  content: "";
+  height: 10px;
+  left: 50%;
+  position: absolute;
+  top: 9px;
+  transform: translateX(-50%);
+  width: 12px;
 }
 
 .selected-check {
@@ -351,6 +430,15 @@ p {
   height: 22px;
   justify-content: center;
   width: 22px;
+}
+
+.selected-check::before {
+  border-bottom: 2px solid #0d1420;
+  border-left: 2px solid #0d1420;
+  content: "";
+  height: 5px;
+  transform: translateY(-1px) rotate(-45deg);
+  width: 10px;
 }
 
 #wifi-form {
@@ -395,6 +483,27 @@ input:focus {
   right: 0;
   top: 0;
   width: 48px;
+}
+
+#toggle-password::before,
+#toggle-password::after {
+  content: "";
+  position: absolute;
+}
+
+#toggle-password::before {
+  border: 2px solid currentColor;
+  border-radius: 50% 50% 46% 46%;
+  height: 14px;
+  transform: rotate(45deg);
+  width: 22px;
+}
+
+#toggle-password::after {
+  background: currentColor;
+  border-radius: 50%;
+  height: 6px;
+  width: 6px;
 }
 
 #wifi-form .primary-action {
@@ -450,6 +559,15 @@ input:focus {
   width: 34px;
 }
 
+.progress-check::before {
+  border-bottom: 2px solid #0d1420;
+  border-left: 2px solid #0d1420;
+  content: "";
+  height: 7px;
+  transform: translateY(-1px) rotate(-45deg);
+  width: 13px;
+}
+
 .progress-complete .progress-dot,
 .progress-current .progress-dot {
   background: var(--blue);
@@ -493,6 +611,64 @@ input:focus {
 .dashboard-link span:first-child,
 .dashboard-link strong {
   color: var(--blue);
+}
+
+.info-icon,
+.globe-icon {
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  height: 20px;
+  position: relative;
+  width: 20px;
+}
+
+.info-icon::before {
+  background: currentColor;
+  border-radius: 50%;
+  content: "";
+  height: 3px;
+  left: 50%;
+  position: absolute;
+  top: 4px;
+  transform: translateX(-50%);
+  width: 3px;
+}
+
+.info-icon::after {
+  background: currentColor;
+  border-radius: 999px;
+  content: "";
+  height: 8px;
+  left: 50%;
+  position: absolute;
+  top: 9px;
+  transform: translateX(-50%);
+  width: 2px;
+}
+
+.globe-icon::before,
+.globe-icon::after {
+  content: "";
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.globe-icon::before {
+  border-left: 1px solid currentColor;
+  border-right: 1px solid currentColor;
+  border-radius: 50%;
+  height: 16px;
+  width: 8px;
+}
+
+.globe-icon::after {
+  border-bottom: 1px solid currentColor;
+  border-top: 1px solid currentColor;
+  height: 8px;
+  width: 16px;
 }
 
 .dashboard-link {

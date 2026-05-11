@@ -8,7 +8,6 @@ const networkCard = document.querySelector(".network-card");
 const networkHelper = document.querySelector("#network-helper");
 const networkList = document.querySelector("#network-list");
 const password = document.querySelector("#password");
-const ssid = document.querySelector("#ssid");
 const togglePassword = document.querySelector("#toggle-password");
 
 let selectedSsid = "";
@@ -34,7 +33,6 @@ function networkSecurity(network) {
 
 function selectNetwork(name) {
   selectedSsid = name;
-  ssid.value = name;
   for (const item of networkList.querySelectorAll("li")) {
     const isSelected = item.dataset.ssid === name;
     item.classList.toggle("network-selected", isSelected);
@@ -43,7 +41,7 @@ function selectNetwork(name) {
       status.innerHTML = "";
       const indicator = document.createElement("span");
       indicator.className = isSelected ? "selected-check" : "network-lock";
-      indicator.textContent = isSelected ? "✓" : item.dataset.security === "locked" ? "▣" : "";
+      indicator.hidden = !isSelected && item.dataset.security !== "locked";
       status.append(indicator);
     }
   }
@@ -61,7 +59,6 @@ function renderNetwork(network) {
   item.className = isSelected ? "network-selected" : "";
 
   icon.className = "network-icon";
-  icon.textContent = "⌁";
 
   button.className = "network-button";
   button.type = "button";
@@ -71,7 +68,7 @@ function renderNetwork(network) {
   status.className = "network-status";
   const indicator = document.createElement("span");
   indicator.className = isSelected ? "selected-check" : "network-lock";
-  indicator.textContent = isSelected ? "✓" : networkSecurity(network) === "locked" ? "▣" : "";
+  indicator.hidden = !isSelected && networkSecurity(network) !== "locked";
   status.append(indicator);
 
   item.append(icon, button, status);
@@ -92,25 +89,23 @@ async function loadNetworks() {
       throw new Error(body.error || "Unable to scan networks.");
     }
     if (body.networks.length === 0) {
-      renderNetworkMessage("No networks found. Enter your network name manually.");
+      renderNetworkMessage("No Wi-Fi networks found. Move closer to your router, then try again.");
       return;
     }
     selectedSsid = selectedSsid || body.networks[0].ssid;
-    ssid.value = selectedSsid;
     setNetworkHelper("");
     networkList.innerHTML = "";
     for (const network of body.networks.slice(0, 5)) {
       networkList.append(renderNetwork(network));
     }
   } catch (error) {
-    renderNetworkMessage("Enter your network name manually.");
+    renderNetworkMessage("Unable to scan Wi-Fi networks.");
     setMessage(error.message);
   }
 }
 
 continueButton.addEventListener("click", () => {
   showScreen("select");
-  loadNetworks();
 });
 
 for (const backButton of document.querySelectorAll("[data-back]")) {
@@ -126,8 +121,12 @@ togglePassword.addEventListener("click", () => {
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   const button = form.querySelector(".primary-action");
+  if (!selectedSsid) {
+    setMessage("Select a Wi-Fi network first.");
+    return;
+  }
   const payload = {
-    ssid: ssid.value,
+    ssid: selectedSsid,
     password: password.value,
   };
 
@@ -154,3 +153,5 @@ form.addEventListener("submit", async (event) => {
     button.disabled = false;
   }
 });
+
+loadNetworks();
