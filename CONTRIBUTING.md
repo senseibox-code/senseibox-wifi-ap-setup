@@ -1,8 +1,8 @@
 # Contributing
 
-Hi! We're genuinely excited that you want to contribute to Senseibox. This project sits right at the edge between software and real hardware, so every thoughtful fix, test, and field report can make setup smoother for someone bringing a device online for the first time.
+Hi! Thanks for wanting to contribute to Senseibox. This software depends on the hardware, so small fixes, tests, and feedback can make a real difference.
 
-Before opening a pull request, please take a few minutes to read these guidelines. They help us keep contributions easy to review, safe to ship, and friendly to the tiny Linux systems this app runs on.
+Before opening a pull request, please take a few minutes to read these guidelines. They help keep contributions easy to review, safe to ship, and practical on the Linux systems this app runs on.
 
 ## Development Setup
 
