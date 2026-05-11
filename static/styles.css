@@ -81,7 +81,7 @@ a {
 }
 
 .brand-logo {
-  height: 30px;
+  height: 28px;
   width: auto;
 }
 
@@ -102,78 +102,72 @@ a {
 }
 
 .wifi-icon {
-  color: var(--blue);
-  height: 88px;
-  position: relative;
-  width: 88px;
+  height: 96px;
+  overflow: visible;
+  width: 96px;
 }
 
+.wifi-dot,
 .wifi-bar {
-  animation: wifi-bar-cycle 3s infinite;
-  border-color: currentColor transparent transparent;
-  border-radius: 50%;
-  border-style: solid;
-  display: block;
-  left: 50%;
-  opacity: 1;
-  position: absolute;
-  transform: translateX(-50%);
-}
-
-.wifi-bar-outer {
-  animation-delay: 0.5s;
-  border-width: 15px;
-  height: 86px;
-  top: 0;
-  width: 88px;
-}
-
-.wifi-bar-middle {
-  animation-delay: 0.25s;
-  border-width: 14px;
-  height: 58px;
-  top: 28px;
-  width: 60px;
-}
-
-.wifi-bar-inner {
-  animation-delay: 0s;
-  border-width: 13px;
-  height: 34px;
-  top: 54px;
-  width: 36px;
+  fill: none;
+  filter: drop-shadow(0 0 0 rgba(120, 160, 255, 0));
+  stroke: #34568f;
+  stroke-linecap: round;
+  animation: wifi-bar-glow 3s ease-in-out infinite;
 }
 
 .wifi-dot {
-  background: currentColor;
-  border-radius: 50%;
-  bottom: 0;
-  display: block;
-  height: 16px;
-  left: 50%;
-  position: absolute;
-  transform: translateX(-50%);
-  width: 16px;
+  fill: #34568f;
+  stroke: none;
+  animation: wifi-dot-glow 3s ease-in-out infinite;
 }
 
-@keyframes wifi-bar-cycle {
+.bar-1 {
+  animation-delay: 0s;
+}
+
+.bar-2 {
+  animation-delay: 0.27s;
+}
+
+.bar-3 {
+  animation-delay: 0.54s;
+}
+
+.bar-4 {
+  animation-delay: 0.81s;
+}
+
+@keyframes wifi-bar-glow {
   0%,
-  18% {
-    opacity: 0.2;
-  }
-
-  32%,
-  76% {
-    opacity: 1;
-  }
-
-  90%,
   100% {
-    opacity: 0.2;
+    filter: drop-shadow(0 0 0 rgba(120, 160, 255, 0));
+    stroke: #34568f;
+  }
+
+  45%,
+  60% {
+    filter: drop-shadow(0 0 14px rgba(120, 160, 255, 0.82));
+    stroke: var(--blue);
+  }
+}
+
+@keyframes wifi-dot-glow {
+  0%,
+  100% {
+    fill: #34568f;
+    filter: drop-shadow(0 0 0 rgba(120, 160, 255, 0));
+  }
+
+  45%,
+  60% {
+    fill: var(--blue);
+    filter: drop-shadow(0 0 14px rgba(120, 160, 255, 0.82));
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .wifi-dot,
   .wifi-bar {
     animation: none;
   }
