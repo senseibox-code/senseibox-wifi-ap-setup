@@ -12,6 +12,14 @@ The installer deploys the app to `/opt/senseibox/senseibox-wifi-ap-mode`, create
 
 It also installs the Debian runtime packages required for Wi-Fi setup and AP mode, including NetworkManager, `hostapd`, `dnsmasq`, Python venv support, `rsync`, and Wi-Fi/network utility packages.
 
+AP setup mode reads deployment-specific settings from `/etc/senseibox/senseibox-wifi-ap-mode`. Before hardware AP testing, set the setup gateway and DHCP range there:
+
+```sh
+sudoedit /etc/senseibox/senseibox-wifi-ap-mode
+```
+
+The installer creates this file with the required variable names commented out so product-specific network values are not baked into the repository.
+
 The setup page listens on port `8080`:
 
 ```text
@@ -23,13 +31,13 @@ http://<senseibox-host>:8080/
 Check service status:
 
 ```sh
-sudo systemctl status senseibox-wifi-ap-mode
+sudo systemctl status senseibox-wifi-ap-mode.service
 ```
 
 Follow service logs:
 
 ```sh
-sudo journalctl -u senseibox-wifi-ap-mode -f
+sudo journalctl -u senseibox-wifi-ap-mode.service -f
 ```
 
 Check AP support services and wireless diagnostics:
@@ -65,3 +73,25 @@ iw list
 ```
 
 By default, saved Wi-Fi settings are written to `/opt/senseibox/senseibox-wifi-ap-mode/state/network.json` with owner-only permissions. Set `SENSEIBOX_WIFI_CONFIG` to override that path.
+
+## Service Modes
+
+Systemd runs boot mode:
+
+```sh
+sudo systemctl start senseibox-wifi-ap-mode.service
+```
+
+Boot mode exits when wired or Wi-Fi networking is already healthy. If setup is needed, it starts AP mode and serves the setup page.
+
+Manual recovery can force setup mode:
+
+```sh
+sudo /opt/senseibox/senseibox-wifi-ap-mode/.venv/bin/senseibox-wifi-ap-mode --host 0.0.0.0 --port 8080
+```
+
+For local development without AP control:
+
+```sh
+senseibox-wifi-ap-mode --web-only --host 127.0.0.1 --port 8080
+```

@@ -8,6 +8,8 @@ SERVICE_GROUP="senseibox"
 INSTALL_ROOT="/opt/senseibox"
 INSTALL_DIR="${INSTALL_ROOT}/${APP_NAME}"
 SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
+ENV_DIR="/etc/senseibox"
+ENV_FILE="${ENV_DIR}/${APP_NAME}"
 DEBIAN_PACKAGES=(
   ca-certificates
   curl
@@ -39,6 +41,8 @@ fi
 echo "Installing Debian runtime packages"
 apt-get update
 DEBIAN_FRONTEND=noninteractive apt-get install -y "${DEBIAN_PACKAGES[@]}"
+systemctl disable --now hostapd >/dev/null 2>&1 || true
+systemctl disable --now dnsmasq >/dev/null 2>&1 || true
 
 if ! command -v python3 >/dev/null 2>&1; then
   echo "python3 is required but was not found." >&2
@@ -64,6 +68,21 @@ fi
 
 install -d -o "${SERVICE_USER}" -g "${SERVICE_GROUP}" "${INSTALL_ROOT}"
 install -d -o "${SERVICE_USER}" -g "${SERVICE_GROUP}" "${INSTALL_DIR}"
+install -d -m 0755 "${ENV_DIR}"
+
+if [ ! -f "${ENV_FILE}" ]; then
+  install -m 0600 /dev/null "${ENV_FILE}"
+  {
+    echo "# Senseibox Wi-Fi setup AP configuration"
+    echo "# Set these before hardware AP testing:"
+    echo "# SENSEIBOX_AP_GATEWAY="
+    echo "# SENSEIBOX_AP_DHCP_START="
+    echo "# SENSEIBOX_AP_DHCP_END="
+    echo "SENSEIBOX_AP_SSID=\"Senseibox Setup\""
+    echo "SENSEIBOX_AP_COUNTRY=\"GB\""
+    echo "SENSEIBOX_AP_CHANNEL=\"6\""
+  } >"${ENV_FILE}"
+fi
 
 systemctl stop "${SERVICE_NAME}" >/dev/null 2>&1 || true
 

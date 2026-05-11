@@ -5,6 +5,20 @@ from pathlib import Path
 from starlette.testclient import TestClient
 
 from senseibox_wifi_ap_mode.app import WifiConfigStore, create_app
+from senseibox_wifi_ap_mode.network import WifiNetwork
+
+
+class FakeNetworkManager:
+    def scan_wifi(self):
+        return [
+            WifiNetwork(
+                ssid="Senseibox Lab",
+                signal=90,
+                security="WPA2",
+                frequency="2412 MHz",
+                connected=False,
+            )
+        ]
 
 
 def test_api_version():
@@ -37,3 +51,27 @@ def test_wifi_configuration_requires_ssid(tmp_path: Path):
 
     assert response.status_code == 400
     assert response.json() == {"error": "SSID is required."}
+
+
+def test_api_networks_returns_scan_results(tmp_path: Path):
+    client = TestClient(
+        create_app(
+            WifiConfigStore(tmp_path / "network.json"),
+            network_manager=FakeNetworkManager(),
+        )
+    )
+
+    response = client.get("/api/networks")
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "networks": [
+            {
+                "ssid": "Senseibox Lab",
+                "signal": 90,
+                "security": "WPA2",
+                "frequency": "2412 MHz",
+                "connected": False,
+            }
+        ]
+    }

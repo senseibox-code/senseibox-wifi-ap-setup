@@ -11,6 +11,13 @@
       <section class="panel">
         <img class="logo" src="/static/logo.svg" alt="Senseibox" />
         <h1>Connect Senseibox to Wi-Fi</h1>
+        <div class="networks">
+          <div class="network-header">
+            <h2>Available networks</h2>
+            <button class="secondary" id="refresh-networks" type="button">Refresh</button>
+          </div>
+          <ul id="network-list"></ul>
+        </div>
         <form id="wifi-form" autocomplete="on">
           <label>
             Network name

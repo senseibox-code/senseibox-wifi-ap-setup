@@ -300,6 +300,8 @@ Default AP radio settings:
 
 The generated config must not include bridge settings. Senseibox setup mode is an isolated temporary setup network, not a bridged permanent access point.
 
+AP deployment-specific settings must be read from `/etc/senseibox/senseibox-wifi-ap-mode` or equivalent product configuration, not hardcoded in source. This includes the setup gateway address and DHCP range.
+
 ## Isolated Setup Network
 
 Senseibox setup AP mode must be an isolated setup network.
@@ -333,6 +335,8 @@ Behavior:
 7. Exit after successful Wi-Fi connection.
 
 The service should not block normal boot longer than necessary.
+
+The service should continue to run as `senseibox:senseibox`. Network operations that need elevated privileges should use a narrowly bounded systemd capability set rather than running the whole service as root.
 
 ## Manual Recovery
 
@@ -446,6 +450,7 @@ The installer and systemd unit must follow Senseibox conventions:
 - Use a virtualenv under `/opt/senseibox/senseibox-wifi-ap-mode/.venv`.
 - Install the tracked systemd unit from `systemd/senseibox-wifi-ap-mode.service`.
 - Install required Debian runtime packages, including `python3`, `python3-venv`, `rsync`, `network-manager`, `hostapd`, `dnsmasq`, and Wi-Fi/network utility packages needed by the service.
+- Create `/etc/senseibox/senseibox-wifi-ap-mode` for deployment-specific AP settings that should not be hardcoded into the repository.
 
 ## Acceptance Criteria
 
@@ -467,6 +472,7 @@ The installer and systemd unit must follow Senseibox conventions:
 - `GET /api/version` returns the current version.
 - Logs contain useful state transitions and never include passwords.
 - The systemd service runs as `senseibox:senseibox`.
+- The systemd service grants only the bounded capabilities needed for AP networking.
 - Installation works from both a source checkout and from the target install directory itself.
 
 ## Open Decisions
