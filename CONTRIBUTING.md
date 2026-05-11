@@ -19,7 +19,7 @@ The app is intentionally small:
 
 - `src/senseibox_wifi_ap_mode/app.py` exposes the web app and API routes.
 - `src/senseibox_wifi_ap_mode/network.py` handles NetworkManager, Wi-Fi scanning, and interface detection.
-- `src/senseibox_wifi_ap_mode/ap.py` generates AP configuration and controls `hostapd`/`dnsmasq`.
+- `src/senseibox_wifi_ap_mode/ap_mode.py` generates AP configuration and controls `hostapd`/`dnsmasq`.
 - `src/senseibox_wifi_ap_mode/service.py` coordinates boot checks, setup mode, and timeout behavior.
 - `static/` contains the setup UI with no frontend build step.
 - `systemd/` contains the tracked service unit.

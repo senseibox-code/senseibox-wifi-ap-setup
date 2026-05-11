@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from threading import Timer
 
-from .ap import AccessPointManager, AccessPointSettings, DEFAULT_STATE_DIR
+from .ap_mode import AccessPointManager, AccessPointSettings, DEFAULT_STATE_DIR
 from .commands import CommandRunner
 from .network import NetworkManagerClient, NetworkProbe, WirelessInterface
 

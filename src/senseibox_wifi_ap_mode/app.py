@@ -19,7 +19,7 @@ from starlette.responses import FileResponse, JSONResponse
 from starlette.routing import Mount, Route
 from starlette.staticfiles import StaticFiles
 
-from .ap import DEFAULT_STATE_DIR
+from .ap_mode import DEFAULT_STATE_DIR
 from .network import NetworkManagerClient
 from .service import WifiSetupService
 

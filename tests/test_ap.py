@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from senseibox_wifi_ap_mode.ap import AccessPointSettings, render_dnsmasq_config, render_hostapd_config
+from senseibox_wifi_ap_mode.ap_mode import AccessPointSettings, render_dnsmasq_config, render_hostapd_config
 
 
 def test_hostapd_config_is_generated_for_selected_interface():
