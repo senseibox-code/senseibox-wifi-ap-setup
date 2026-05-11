@@ -26,7 +26,7 @@ This file is the product and implementation guide for the service. If requiremen
 
 ## Boot-Time User Experience
 
-1. The user connects the Arduino UNO Q board to power.
+1. The user connects Senseibox to power.
 2. Linux boots.
 3. `senseibox-wifi-ap-mode.service` starts.
 4. The service checks whether there is a usable wired connection.
