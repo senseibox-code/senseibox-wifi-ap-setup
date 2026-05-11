@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Senseibox Wi-Fi Setup</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="panel">
+        <img class="logo" src="/static/logo.svg" alt="Senseibox" />
+        <h1>Connect Senseibox to Wi-Fi</h1>
+        <form id="wifi-form" autocomplete="on">
+          <label>
+            Network name
+            <input id="ssid" name="ssid" autocomplete="off" required />
+          </label>
+          <label>
+            Password
+            <input id="password" name="password" type="password" autocomplete="current-password" minlength="8" required />
+          </label>
+          <button type="submit">Save network</button>
+        </form>
+        <p id="message" role="status"></p>
+      </section>
+    </main>
+    <script src="/static/setup.js"></script>
+  </body>
+</html>
