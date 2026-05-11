@@ -217,6 +217,103 @@ Recommended stack:
 
 NetworkManager is preferred because it works well on Debian, Ubuntu, and Armbian, supports scanning and saved connections, and is easier to operate safely than direct `wpa_supplicant` management.
 
+## Interface Ownership
+
+Only one network manager may control the Wi-Fi interface at a time.
+
+Normal client mode:
+
+- NetworkManager owns the selected Wi-Fi interface.
+- `hostapd` is stopped.
+- `dnsmasq` setup-mode DHCP is stopped.
+
+AP setup mode:
+
+- NetworkManager must stop managing the selected Wi-Fi interface before `hostapd` starts.
+- `hostapd` owns the selected Wi-Fi interface.
+- `dnsmasq` provides DHCP for the isolated setup network.
+
+After setup succeeds:
+
+- `hostapd` must stop.
+- `dnsmasq` setup-mode DHCP must stop.
+- NetworkManager must take control of the Wi-Fi interface again.
+
+The service must avoid situations where NetworkManager and `hostapd` fight for control of the same Wi-Fi interface. Ownership transitions must be logged and must be reversible on failure.
+
+## Hardware and Driver Validation
+
+The service must not assume the Wi-Fi interface is named `wlan0`.
+
+The service must detect wireless interfaces dynamically using Linux networking tools such as:
+
+```bash
+iw dev
+```
+
+Interface selection requirements:
+
+- Find wireless interfaces at runtime.
+- Prefer the first wireless interface that supports AP mode.
+- Store the selected interface in runtime state.
+- Use the selected interface consistently for NetworkManager handoff, `hostapd`, and diagnostics.
+- Fail clearly if no suitable wireless interface exists.
+
+Before trying to start setup mode, the service must check whether the selected Wi-Fi interface supports AP mode.
+
+Useful diagnostic command:
+
+```bash
+iw list
+```
+
+The supported interface modes must include AP support. If AP mode is unavailable, the service must report a clear error instead of pretending setup mode has started.
+
+The setup AP should default to 2.4 GHz unless hardware validation proves 5 GHz is reliable on the target Senseibox hardware. Setup mode needs compatibility and reliability more than throughput.
+
+## hostapd Configuration
+
+The service must generate `hostapd` configuration from a template at runtime. It must not rely on a static config with a hardcoded interface name.
+
+The generated config must include at least:
+
+```text
+interface
+driver
+ssid
+country_code
+hw_mode
+channel
+wpa
+wpa_passphrase
+wpa_key_mgmt
+rsn_pairwise
+```
+
+Default AP radio settings:
+
+- Driver: `nl80211`.
+- Band: 2.4 GHz.
+- Hardware mode: `g`.
+- Country code: `GB`, unless product configuration overrides it.
+- Channel: configurable; use a conservative default suitable for 2.4 GHz setup mode.
+
+The generated config must not include bridge settings. Senseibox setup mode is an isolated temporary setup network, not a bridged permanent access point.
+
+## Isolated Setup Network
+
+Senseibox setup AP mode must be an isolated setup network.
+
+Requirements:
+
+- DHCP is enabled for setup clients.
+- The setup page is reachable through the setup gateway address.
+- Internet sharing is disabled by default.
+- Bridge mode is not used.
+- No `br0` or equivalent bridge interface is required for setup mode.
+
+Do not copy bridged access point patterns unless a future requirement explicitly changes Senseibox into a permanent Wi-Fi extender, which is outside the current product scope.
+
 ## Systemd Requirements
 
 Service name:
@@ -359,6 +456,12 @@ The installer and systemd unit must follow Senseibox conventions:
 - The setup page supports manual hidden SSID entry.
 - Submitted Wi-Fi passwords with spaces, quotes, symbols, and Unicode characters are preserved.
 - The service attempts to connect using submitted credentials without unsafe shell interpolation.
+- The service detects the Wi-Fi interface dynamically and does not hardcode `wlan0`.
+- The service validates AP mode support before starting `hostapd`.
+- NetworkManager does not manage the selected Wi-Fi interface while `hostapd` owns it.
+- The service generates `hostapd` config with the selected interface, setup SSID, setup password, country code, channel, and WPA settings.
+- Setup AP mode defaults to 2.4 GHz.
+- Setup AP mode is isolated and does not create a bridge interface.
 - Existing Wi-Fi profiles are not deleted until replacement credentials succeed.
 - Failed connection attempts return the device to AP setup mode.
 - `GET /api/version` returns the current version.
@@ -374,3 +477,5 @@ The installer and systemd unit must follow Senseibox conventions:
 - Exact local LAN reachability check.
 - Whether endpoint checks require internet access or only local product infrastructure.
 - Whether captive portal DNS redirect is required for the first production release.
+- Exact Wi-Fi interface selection priority if multiple AP-capable wireless interfaces exist.
+- Final default 2.4 GHz setup channel after hardware validation.

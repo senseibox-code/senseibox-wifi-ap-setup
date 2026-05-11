@@ -32,6 +32,24 @@ Follow service logs:
 sudo journalctl -u senseibox-wifi-ap-mode -f
 ```
 
+Check AP support services and wireless diagnostics:
+
+```sh
+sudo systemctl status hostapd
+```
+
+```sh
+ip a
+```
+
+```sh
+iw dev
+```
+
+```sh
+iw list
+```
+
 ## API
 
 `GET /api/version` returns the running app version:
