@@ -7,29 +7,129 @@
     <link rel="stylesheet" href="/static/styles.css" />
   </head>
   <body>
-    <main class="shell">
-      <section class="panel">
-        <img class="logo" src="/static/logo.svg" alt="Senseibox" />
-        <h1>Connect Senseibox to Wi-Fi</h1>
-        <div class="networks">
-          <div class="network-header">
-            <h2>Available networks</h2>
-            <button class="secondary" id="refresh-networks" type="button">Refresh</button>
+    <main class="app-shell">
+      <section class="phone-frame" aria-live="polite">
+        <section class="screen screen-active" data-screen="welcome">
+          <header class="status-bar" aria-hidden="true">
+            <span>9:41</span>
+            <span class="status-icons">▮▮▮ ◒ ▰</span>
+          </header>
+
+          <div class="brand-row">
+            <img class="brand-logo" src="/static/logo.svg" alt="Senseibox" />
           </div>
-          <ul id="network-list"></ul>
-        </div>
-        <form id="wifi-form" autocomplete="on">
-          <label>
-            Network name
+
+          <div class="hero-icon" aria-hidden="true">
+            <span class="wifi-glyph"></span>
+          </div>
+
+          <div class="copy-block">
+            <h1>Set up Wi-Fi</h1>
+            <p>Connect to the Senseibox setup network, then continue.</p>
+          </div>
+
+          <button class="primary-action bottom-action" id="continue-button" type="button">Continue</button>
+        </section>
+
+        <section class="screen" data-screen="select" aria-labelledby="select-title">
+          <header class="status-bar" aria-hidden="true">
+            <span>9:41</span>
+            <span class="status-icons">▮▮▮ ◒ ▰</span>
+          </header>
+
+          <button class="icon-button back-button" data-back="welcome" type="button" aria-label="Back">‹</button>
+
+          <div class="screen-heading">
+            <h1 id="select-title">Choose a network</h1>
+            <p>Select your 2.4/5 GHz Wi-Fi network.</p>
+          </div>
+
+          <div class="network-card">
+            <ul id="network-list"></ul>
+          </div>
+
+          <form id="wifi-form" autocomplete="on">
+            <label for="ssid">Network name</label>
             <input id="ssid" name="ssid" autocomplete="off" required />
-          </label>
-          <label>
-            Password
-            <input id="password" name="password" type="password" autocomplete="current-password" minlength="8" required />
-          </label>
-          <button type="submit">Save network</button>
-        </form>
-        <p id="message" role="status"></p>
+
+            <label for="password">Password</label>
+            <div class="password-field">
+              <input id="password" name="password" type="password" autocomplete="current-password" minlength="8" required />
+              <button class="icon-button" id="toggle-password" type="button" aria-label="Show password">◉</button>
+            </div>
+
+            <button class="primary-action" type="submit">Connect</button>
+          </form>
+          <p id="message" role="status"></p>
+        </section>
+
+        <section class="screen" data-screen="connecting" aria-labelledby="connecting-title">
+          <header class="status-bar" aria-hidden="true">
+            <span>9:41</span>
+            <span class="status-icons">▮▮▮ ◒ ▰</span>
+          </header>
+
+          <button class="icon-button back-button" data-back="select" type="button" aria-label="Back">‹</button>
+
+          <div class="screen-heading">
+            <h1 id="connecting-title">Connecting</h1>
+            <p>Please wait while we connect Senseibox to your Wi-Fi.</p>
+          </div>
+
+          <ol class="progress-list" aria-label="Connection progress">
+            <li class="progress-step progress-complete">
+              <span class="progress-dot">✓</span>
+              <span>
+                <strong>Saving</strong>
+                <small>Wi-Fi credentials saved</small>
+              </span>
+            </li>
+            <li class="progress-step progress-current">
+              <span class="progress-dot"></span>
+              <span>
+                <strong>Disabling AP</strong>
+                <small>Switching connection</small>
+              </span>
+            </li>
+            <li class="progress-step">
+              <span class="progress-dot"></span>
+              <span>
+                <strong>Connecting</strong>
+                <small>Joining your network</small>
+              </span>
+            </li>
+          </ol>
+
+          <div class="notice">
+            <span aria-hidden="true">ⓘ</span>
+            <span>Your phone may disconnect briefly.</span>
+          </div>
+        </section>
+
+        <section class="screen" data-screen="success" aria-labelledby="success-title">
+          <header class="status-bar" aria-hidden="true">
+            <span>9:41</span>
+            <span class="status-icons">▮▮▮ ◒ ▰</span>
+          </header>
+
+          <div class="brand-row">
+            <img class="brand-logo" src="/static/logo.svg" alt="Senseibox" />
+          </div>
+
+          <div class="hero-icon success-icon" aria-hidden="true">✓</div>
+
+          <div class="copy-block">
+            <h1 id="success-title">Connected</h1>
+            <p>Senseibox is now on your Wi-Fi network.</p>
+          </div>
+
+          <a class="dashboard-link" href="http://senseibox.local">
+            <span aria-hidden="true">◎</span>
+            <span>Open: <strong>senseibox.local</strong></span>
+          </a>
+
+          <a class="primary-action bottom-action" href="http://senseibox.local">Open dashboard</a>
+        </section>
       </section>
     </main>
     <script src="/static/setup.js"></script>

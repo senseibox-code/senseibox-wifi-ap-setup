@@ -142,6 +142,8 @@ Open AP mode is acceptable only for prototypes and local development. Production
 
 Before implementing or substantially changing the web app UI, ask the product owner for the current designs. The setup page should reuse Senseibox KPI app UI code, styling conventions, and interaction patterns where practical because the Wi-Fi setup UI is expected to look similar.
 
+The setup UI supports one mobile-sized breakpoint for the first release. Tablet and desktop users should see the same fixed-width screens centered in the viewport.
+
 The setup page must show:
 
 - Senseibox name.

@@ -1,10 +1,86 @@
+const screens = new Map(
+  Array.from(document.querySelectorAll("[data-screen]")).map((screen) => [screen.dataset.screen, screen]),
+);
+const continueButton = document.querySelector("#continue-button");
 const form = document.querySelector("#wifi-form");
 const message = document.querySelector("#message");
 const networkList = document.querySelector("#network-list");
-const refreshNetworks = document.querySelector("#refresh-networks");
+const password = document.querySelector("#password");
+const ssid = document.querySelector("#ssid");
+const togglePassword = document.querySelector("#toggle-password");
+
+let selectedSsid = "";
+
+function showScreen(name) {
+  for (const [screenName, screen] of screens) {
+    screen.classList.toggle("screen-active", screenName === name);
+  }
+}
+
+function setMessage(text) {
+  message.textContent = text;
+}
+
+function networkSecurity(network) {
+  return network.security && network.security !== "open" ? "locked" : "open";
+}
+
+function selectNetwork(name) {
+  selectedSsid = name;
+  ssid.value = name;
+  for (const item of networkList.querySelectorAll("li")) {
+    const isSelected = item.dataset.ssid === name;
+    item.classList.toggle("network-selected", isSelected);
+    const status = item.querySelector(".network-status");
+    if (status) {
+      status.innerHTML = "";
+      const indicator = document.createElement("span");
+      indicator.className = isSelected ? "selected-check" : "network-lock";
+      indicator.textContent = isSelected ? "✓" : item.dataset.security === "locked" ? "▣" : "";
+      status.append(indicator);
+    }
+  }
+}
+
+function renderNetwork(network) {
+  const item = document.createElement("li");
+  const icon = document.createElement("span");
+  const button = document.createElement("button");
+  const status = document.createElement("span");
+  const isSelected = network.ssid === selectedSsid;
+
+  item.dataset.ssid = network.ssid;
+  item.dataset.security = networkSecurity(network);
+  item.className = isSelected ? "network-selected" : "";
+
+  icon.className = "network-icon";
+  icon.textContent = "⌁";
+
+  button.className = "network-button";
+  button.type = "button";
+  button.textContent = network.ssid;
+  button.addEventListener("click", () => selectNetwork(network.ssid));
+
+  status.className = "network-status";
+  const indicator = document.createElement("span");
+  indicator.className = isSelected ? "selected-check" : "network-lock";
+  indicator.textContent = isSelected ? "✓" : networkSecurity(network) === "locked" ? "▣" : "";
+  status.append(indicator);
+
+  item.append(icon, button, status);
+  return item;
+}
+
+function renderNetworkMessage(text) {
+  networkList.innerHTML = "";
+  const item = document.createElement("li");
+  item.textContent = text;
+  item.style.gridTemplateColumns = "1fr";
+  networkList.append(item);
+}
 
 async function loadNetworks() {
-  networkList.innerHTML = "<li>Scanning...</li>";
+  renderNetworkMessage("Scanning networks...");
   try {
     const response = await fetch("/api/networks");
     const body = await response.json();
@@ -12,43 +88,47 @@ async function loadNetworks() {
       throw new Error(body.error || "Unable to scan networks.");
     }
     if (body.networks.length === 0) {
-      networkList.innerHTML = "<li>No networks found.</li>";
+      renderNetworkMessage("No networks found. Enter your network name manually.");
       return;
     }
+    selectedSsid = selectedSsid || body.networks[0].ssid;
+    ssid.value = selectedSsid;
     networkList.innerHTML = "";
-    for (const network of body.networks) {
-      const item = document.createElement("li");
-      const button = document.createElement("button");
-      const meta = document.createElement("span");
-      button.type = "button";
-      button.textContent = network.ssid;
-      button.addEventListener("click", () => {
-        form.ssid.value = network.ssid;
-        form.password.focus();
-      });
-      meta.className = "network-meta";
-      meta.textContent = `${network.signal ?? "?"}% ${network.security}`;
-      item.append(button, meta);
-      networkList.append(item);
+    for (const network of body.networks.slice(0, 5)) {
+      networkList.append(renderNetwork(network));
     }
   } catch (error) {
-    networkList.innerHTML = "";
-    const item = document.createElement("li");
-    item.textContent = error.message;
-    networkList.append(item);
+    renderNetworkMessage("Enter your network name manually.");
+    setMessage(error.message);
   }
 }
 
+continueButton.addEventListener("click", () => {
+  showScreen("select");
+  loadNetworks();
+});
+
+for (const backButton of document.querySelectorAll("[data-back]")) {
+  backButton.addEventListener("click", () => showScreen(backButton.dataset.back));
+}
+
+togglePassword.addEventListener("click", () => {
+  const shouldShow = password.type === "password";
+  password.type = shouldShow ? "text" : "password";
+  togglePassword.setAttribute("aria-label", shouldShow ? "Hide password" : "Show password");
+});
+
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
-  const button = form.querySelector("button");
+  const button = form.querySelector(".primary-action");
   const payload = {
-    ssid: form.ssid.value,
-    password: form.password.value,
+    ssid: ssid.value,
+    password: password.value,
   };
 
   button.disabled = true;
-  message.textContent = "Saving network...";
+  setMessage("");
+  showScreen("connecting");
 
   try {
     const response = await fetch("/api/wifi", {
@@ -58,16 +138,14 @@ form.addEventListener("submit", async (event) => {
     });
     const body = await response.json();
     if (!response.ok) {
-      throw new Error(body.error || "Unable to save network.");
+      throw new Error(body.error || "Unable to connect to Wi-Fi.");
     }
-    message.textContent = "Network saved. Senseibox will use these settings on reconnect.";
     form.reset();
+    showScreen("success");
   } catch (error) {
-    message.textContent = error.message;
+    showScreen("select");
+    setMessage(error.message);
   } finally {
     button.disabled = false;
   }
 });
-
-refreshNetworks.addEventListener("click", loadNetworks);
-loadNetworks();
