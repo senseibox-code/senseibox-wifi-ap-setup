@@ -4,6 +4,8 @@ const screens = new Map(
 const continueButton = document.querySelector("#continue-button");
 const form = document.querySelector("#wifi-form");
 const message = document.querySelector("#message");
+const networkCard = document.querySelector(".network-card");
+const networkHelper = document.querySelector("#network-helper");
 const networkList = document.querySelector("#network-list");
 const password = document.querySelector("#password");
 const ssid = document.querySelector("#ssid");
@@ -19,6 +21,11 @@ function showScreen(name) {
 
 function setMessage(text) {
   message.textContent = text;
+}
+
+function setNetworkHelper(text) {
+  networkHelper.textContent = text;
+  networkCard.classList.toggle("network-card-empty", Boolean(text));
 }
 
 function networkSecurity(network) {
@@ -73,10 +80,7 @@ function renderNetwork(network) {
 
 function renderNetworkMessage(text) {
   networkList.innerHTML = "";
-  const item = document.createElement("li");
-  item.textContent = text;
-  item.style.gridTemplateColumns = "1fr";
-  networkList.append(item);
+  setNetworkHelper(text);
 }
 
 async function loadNetworks() {
@@ -93,6 +97,7 @@ async function loadNetworks() {
     }
     selectedSsid = selectedSsid || body.networks[0].ssid;
     ssid.value = selectedSsid;
+    setNetworkHelper("");
     networkList.innerHTML = "";
     for (const network of body.networks.slice(0, 5)) {
       networkList.append(renderNetwork(network));
