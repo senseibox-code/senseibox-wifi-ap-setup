@@ -102,20 +102,81 @@ a {
 }
 
 .wifi-icon {
+  color: var(--blue);
   height: 88px;
-  overflow: visible;
+  position: relative;
   width: 88px;
 }
 
-.wifi-icon path {
-  fill: none;
-  stroke: currentColor;
-  stroke-linecap: butt;
-  stroke-width: 46;
+.wifi-bar {
+  animation: wifi-bar-cycle 3s infinite;
+  border-color: currentColor transparent transparent;
+  border-radius: 50%;
+  border-style: solid;
+  display: block;
+  left: 50%;
+  opacity: 1;
+  position: absolute;
+  transform: translateX(-50%);
 }
 
-.wifi-icon circle {
-  fill: currentColor;
+.wifi-bar-outer {
+  animation-delay: 0.5s;
+  border-width: 15px;
+  height: 86px;
+  top: 0;
+  width: 88px;
+}
+
+.wifi-bar-middle {
+  animation-delay: 0.25s;
+  border-width: 14px;
+  height: 58px;
+  top: 28px;
+  width: 60px;
+}
+
+.wifi-bar-inner {
+  animation-delay: 0s;
+  border-width: 13px;
+  height: 34px;
+  top: 54px;
+  width: 36px;
+}
+
+.wifi-dot {
+  background: currentColor;
+  border-radius: 50%;
+  bottom: 0;
+  display: block;
+  height: 16px;
+  left: 50%;
+  position: absolute;
+  transform: translateX(-50%);
+  width: 16px;
+}
+
+@keyframes wifi-bar-cycle {
+  0%,
+  18% {
+    opacity: 0.2;
+  }
+
+  32%,
+  76% {
+    opacity: 1;
+  }
+
+  90%,
+  100% {
+    opacity: 0.2;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wifi-bar {
+    animation: none;
+  }
 }
 
 .success-icon {
