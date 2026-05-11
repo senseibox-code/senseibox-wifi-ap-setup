@@ -12,6 +12,42 @@ const togglePassword = document.querySelector("#toggle-password");
 
 let selectedSsid = "";
 
+const icons = {
+  checkCircle: `
+    <svg class="svg-icon selected-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="10" />
+      <path d="m7.5 12.5 3 3 6-7" />
+    </svg>
+  `,
+  lock: `
+    <svg class="svg-icon network-lock" viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="5.5" y="10" width="13" height="10" rx="2" />
+      <path d="M8.5 10V7.5a3.5 3.5 0 0 1 7 0V10" />
+    </svg>
+  `,
+  wifi: `
+    <svg class="svg-icon network-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M5 13.1a10.1 10.1 0 0 1 14 0" />
+      <path d="M8.5 16.2a5.1 5.1 0 0 1 7 0" />
+      <path d="M12 19.5h.01" />
+    </svg>
+  `,
+  eye: `
+    <svg class="svg-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M2.1 12.35C3.48 7.94 7.58 5 12 5s8.52 2.94 9.9 7.35a1.3 1.3 0 0 1 0 .3C20.52 17.06 16.42 20 12 20s-8.52-2.94-9.9-7.35a1.3 1.3 0 0 1 0-.3Z" />
+      <circle cx="12" cy="12.5" r="3" />
+    </svg>
+  `,
+  eyeOff: `
+    <svg class="svg-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="m3 3 18 18" />
+      <path d="M10.6 10.8a3 3 0 0 0 4.1 4.1" />
+      <path d="M9.5 5.4A10.1 10.1 0 0 1 12 5c4.42 0 8.52 2.94 9.9 7.35a1.3 1.3 0 0 1 0 .3 11.3 11.3 0 0 1-2 3.68" />
+      <path d="M6.4 6.9a11.2 11.2 0 0 0-4.3 5.45 1.3 1.3 0 0 0 0 .3C3.48 17.06 7.58 20 12 20a10.2 10.2 0 0 0 5.1-1.36" />
+    </svg>
+  `,
+};
+
 function showScreen(name) {
   for (const [screenName, screen] of screens) {
     screen.classList.toggle("screen-active", screenName === name);
@@ -38,11 +74,8 @@ function selectNetwork(name) {
     item.classList.toggle("network-selected", isSelected);
     const status = item.querySelector(".network-status");
     if (status) {
-      status.innerHTML = "";
-      const indicator = document.createElement("span");
-      indicator.className = isSelected ? "selected-check" : "network-lock";
-      indicator.hidden = !isSelected && item.dataset.security !== "locked";
-      status.append(indicator);
+      status.innerHTML = isSelected ? icons.checkCircle : icons.lock;
+      status.hidden = !isSelected && item.dataset.security !== "locked";
     }
   }
 }
@@ -58,7 +91,8 @@ function renderNetwork(network) {
   item.dataset.security = networkSecurity(network);
   item.className = isSelected ? "network-selected" : "";
 
-  icon.className = "network-icon";
+  icon.className = "network-icon-wrap";
+  icon.innerHTML = icons.wifi;
 
   button.className = "network-button";
   button.type = "button";
@@ -66,10 +100,8 @@ function renderNetwork(network) {
   button.addEventListener("click", () => selectNetwork(network.ssid));
 
   status.className = "network-status";
-  const indicator = document.createElement("span");
-  indicator.className = isSelected ? "selected-check" : "network-lock";
-  indicator.hidden = !isSelected && networkSecurity(network) !== "locked";
-  status.append(indicator);
+  status.innerHTML = isSelected ? icons.checkCircle : icons.lock;
+  status.hidden = !isSelected && networkSecurity(network) !== "locked";
 
   item.append(icon, button, status);
   return item;
@@ -116,6 +148,7 @@ togglePassword.addEventListener("click", () => {
   const shouldShow = password.type === "password";
   password.type = shouldShow ? "text" : "password";
   togglePassword.setAttribute("aria-label", shouldShow ? "Hide password" : "Show password");
+  togglePassword.innerHTML = shouldShow ? icons.eyeOff : icons.eye;
 });
 
 form.addEventListener("submit", async (event) => {
