@@ -61,19 +61,6 @@ a {
   width: min(100%, 390px);
 }
 
-.phone-frame::after {
-  background: #f5f7fb;
-  border-radius: 999px;
-  bottom: 13px;
-  content: "";
-  height: 4px;
-  left: 50%;
-  opacity: 0.95;
-  position: absolute;
-  transform: translateX(-50%);
-  width: 118px;
-}
-
 .screen {
   display: none;
   height: 100%;
@@ -87,26 +74,10 @@ a {
   flex-direction: column;
 }
 
-.status-bar {
-  align-items: center;
-  display: flex;
-  font-size: 0.88rem;
-  font-weight: 700;
-  justify-content: space-between;
-  min-height: 22px;
-  padding: 0 10px;
-}
-
-.status-icons {
-  color: #f7f8fb;
-  font-size: 0.76rem;
-  letter-spacing: 0;
-}
-
 .brand-row {
   display: flex;
   justify-content: center;
-  margin-top: 40px;
+  margin-top: 58px;
 }
 
 .brand-logo {
@@ -130,41 +101,21 @@ a {
   width: 140px;
 }
 
-.wifi-glyph,
-.wifi-glyph::before,
-.wifi-glyph::after {
-  border: 5px solid transparent;
-  border-radius: 50%;
-  border-top-color: currentColor;
-  display: block;
+.wifi-icon {
+  height: 78px;
+  overflow: visible;
+  width: 78px;
 }
 
-.wifi-glyph {
-  height: 74px;
-  position: relative;
-  width: 92px;
+.wifi-icon path {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-width: 5.5;
 }
 
-.wifi-glyph::before,
-.wifi-glyph::after {
-  content: "";
-  left: 50%;
-  position: absolute;
-  transform: translateX(-50%);
-}
-
-.wifi-glyph::before {
-  height: 46px;
-  top: 20px;
-  width: 62px;
-}
-
-.wifi-glyph::after {
-  background: currentColor;
-  border: 0;
-  height: 9px;
-  top: 56px;
-  width: 9px;
+.wifi-icon circle {
+  fill: currentColor;
 }
 
 .success-icon {
@@ -249,12 +200,12 @@ p {
   height: 44px;
   left: 22px;
   position: absolute;
-  top: 74px;
+  top: 32px;
   width: 44px;
 }
 
 .screen-heading {
-  margin-top: 82px;
+  margin-top: 88px;
 }
 
 .screen-heading p {

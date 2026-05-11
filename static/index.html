@@ -10,17 +10,17 @@
     <main class="app-shell">
       <section class="phone-frame" aria-live="polite">
         <section class="screen screen-active" data-screen="welcome">
-          <header class="status-bar" aria-hidden="true">
-            <span>9:41</span>
-            <span class="status-icons">▮▮▮ ◒ ▰</span>
-          </header>
-
           <div class="brand-row">
             <img class="brand-logo" src="/static/assets/logo_dark.png" alt="Senseibox" />
           </div>
 
           <div class="hero-icon" aria-hidden="true">
-            <span class="wifi-glyph"></span>
+            <svg class="wifi-icon" viewBox="0 0 64 64" focusable="false">
+              <path d="M8 22.5C21.3 10.8 42.7 10.8 56 22.5" />
+              <path d="M18.5 34c7.8-6.9 19.2-6.9 27 0" />
+              <path d="M28 45.3c2.4-2.1 5.6-2.1 8 0" />
+              <circle cx="32" cy="52" r="3.8" />
+            </svg>
           </div>
 
           <div class="copy-block">
@@ -32,11 +32,6 @@
         </section>
 
         <section class="screen" data-screen="select" aria-labelledby="select-title">
-          <header class="status-bar" aria-hidden="true">
-            <span>9:41</span>
-            <span class="status-icons">▮▮▮ ◒ ▰</span>
-          </header>
-
           <button class="icon-button back-button" data-back="welcome" type="button" aria-label="Back">‹</button>
 
           <div class="screen-heading">
@@ -64,11 +59,6 @@
         </section>
 
         <section class="screen" data-screen="connecting" aria-labelledby="connecting-title">
-          <header class="status-bar" aria-hidden="true">
-            <span>9:41</span>
-            <span class="status-icons">▮▮▮ ◒ ▰</span>
-          </header>
-
           <button class="icon-button back-button" data-back="select" type="button" aria-label="Back">‹</button>
 
           <div class="screen-heading">
@@ -107,11 +97,6 @@
         </section>
 
         <section class="screen" data-screen="success" aria-labelledby="success-title">
-          <header class="status-bar" aria-hidden="true">
-            <span>9:41</span>
-            <span class="status-icons">▮▮▮ ◒ ▰</span>
-          </header>
-
           <div class="brand-row">
             <img class="brand-logo" src="/static/assets/logo_dark.png" alt="Senseibox" />
           </div>
