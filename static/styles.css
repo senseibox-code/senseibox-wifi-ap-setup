@@ -279,9 +279,9 @@ p {
 
 .refresh-button {
   color: var(--blue);
-  height: 42px;
-  margin: 24px auto 0;
-  width: 42px;
+  height: 38px;
+  margin: 6px auto 0;
+  width: 38px;
 }
 
 .refresh-button:disabled {
@@ -293,7 +293,7 @@ p {
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 9px;
-  max-height: 270px;
+  max-height: 218px;
   overflow-y: auto;
   scrollbar-color: rgba(120, 160, 255, 0.72) rgba(255, 255, 255, 0.04);
   scrollbar-width: thin;
