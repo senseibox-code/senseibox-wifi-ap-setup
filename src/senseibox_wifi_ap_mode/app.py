@@ -242,7 +242,7 @@ def main() -> None:
         LOGGER.info("Using fake Wi-Fi data; NetworkManager, hostapd, and dnsmasq will not be controlled.")
         app_instance = create_app(
             config_store=WifiConfigStore.for_development(),
-            network_manager=FakeNetworkManagerClient(scan_delay_seconds=6),
+            network_manager=FakeNetworkManagerClient(),
             connect_on_submit=True,
         )
     elif not args.web_only:

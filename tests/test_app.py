@@ -99,7 +99,7 @@ def test_fake_network_mode_returns_design_networks(tmp_path: Path):
     client = TestClient(
         create_app(
             WifiConfigStore(tmp_path / "network.json"),
-            network_manager=FakeNetworkManagerClient(),
+            network_manager=FakeNetworkManagerClient(scan_delay_seconds=0),
         )
     )
 
@@ -117,6 +117,10 @@ def test_fake_network_mode_returns_design_networks(tmp_path: Path):
     assert len(networks) > 5
 
 
+def test_fake_network_mode_defaults_to_development_scan_delay():
+    assert FakeNetworkManagerClient().scan_delay_seconds == 6
+
+
 def test_fake_network_development_store_uses_local_state_by_default(monkeypatch):
     monkeypatch.delenv("SENSEIBOX_WIFI_CONFIG", raising=False)
 
@@ -130,7 +134,7 @@ def test_fake_network_mode_connects_without_ap_service(tmp_path: Path):
     client = TestClient(
         create_app(
             WifiConfigStore(config_path),
-            network_manager=FakeNetworkManagerClient(),
+            network_manager=FakeNetworkManagerClient(scan_delay_seconds=0),
             connect_on_submit=True,
         )
     )
@@ -150,7 +154,7 @@ def test_fake_network_mode_can_return_connection_failure(tmp_path: Path):
     client = TestClient(
         create_app(
             WifiConfigStore(config_path),
-            network_manager=FakeNetworkManagerClient(),
+            network_manager=FakeNetworkManagerClient(scan_delay_seconds=0),
             connect_on_submit=True,
         )
     )
