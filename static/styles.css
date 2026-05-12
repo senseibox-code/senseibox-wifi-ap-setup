@@ -38,19 +38,13 @@ a {
 .app-shell {
   display: grid;
   min-height: 100vh;
-  padding: 22px 14px;
+  padding: 0;
   place-items: center;
 }
 
 .phone-frame {
-  background:
-    radial-gradient(circle at 50% 16%, rgba(95, 120, 158, 0.14), transparent 34%),
-    linear-gradient(160deg, rgba(18, 26, 35, 0.98), rgba(10, 15, 21, 0.98));
-  border: 1px solid rgba(171, 185, 205, 0.28);
-  border-radius: 34px;
-  box-shadow: 0 24px 80px var(--shadow);
-  height: 812px;
-  max-height: calc(100vh - 32px);
+  height: 100vh;
+  min-height: 100vh;
   overflow: hidden;
   position: relative;
   width: min(100%, 390px);
@@ -67,10 +61,6 @@ a {
 .screen-active {
   display: flex;
   flex-direction: column;
-}
-
-.screen[data-screen="select"] {
-  background: rgba(17, 24, 33, 0.88);
 }
 
 .brand-row {
@@ -312,14 +302,6 @@ p {
   stroke-linejoin: round;
   stroke-width: 2;
   width: 22px;
-}
-
-.back-button {
-  height: 40px;
-  left: 33px;
-  position: absolute;
-  top: 64px;
-  width: 40px;
 }
 
 .screen-heading {
@@ -635,69 +617,6 @@ input:focus {
   text-align: center;
 }
 
-.progress-list {
-  list-style: none;
-  margin: 66px 0 0 36px;
-  padding: 0;
-  position: relative;
-}
-
-.progress-list::before {
-  background: linear-gradient(var(--blue), rgba(120, 160, 255, 0.2));
-  content: "";
-  height: 190px;
-  left: 16px;
-  position: absolute;
-  top: 32px;
-  width: 2px;
-}
-
-.progress-step {
-  align-items: center;
-  display: grid;
-  gap: 18px;
-  grid-template-columns: 34px 1fr;
-  min-height: 112px;
-  position: relative;
-  z-index: 1;
-}
-
-.progress-dot {
-  align-items: center;
-  background: #111821;
-  border: 2px solid rgba(164, 178, 197, 0.5);
-  border-radius: 50%;
-  color: #0d1420;
-  display: flex;
-  font-weight: 900;
-  height: 34px;
-  justify-content: center;
-  width: 34px;
-}
-
-.progress-complete .progress-dot,
-.progress-current .progress-dot {
-  background: var(--blue);
-  border-color: var(--blue);
-}
-
-.progress-current .progress-dot {
-  box-shadow: 0 0 0 9px rgba(120, 160, 255, 0.2);
-}
-
-.progress-step strong {
-  display: block;
-  font-size: 1rem;
-}
-
-.progress-step small {
-  color: var(--muted);
-  display: block;
-  font-size: 0.85rem;
-  margin-top: 6px;
-}
-
-.notice,
 .dashboard-link {
   align-items: center;
   color: var(--muted);
@@ -708,17 +627,11 @@ input:focus {
   padding: 0 16px;
 }
 
-.notice {
-  margin-top: auto;
-}
-
-.notice span:first-child,
 .dashboard-link span:first-child,
 .dashboard-link strong {
   color: var(--blue);
 }
 
-.info-icon,
 .globe-icon {
   flex: 0 0 auto;
   height: 20px;
@@ -730,11 +643,31 @@ input:focus {
   text-decoration: none;
 }
 
-@media (max-height: 760px) {
+@media (min-width: 640px) {
+  .app-shell {
+    padding: 22px 14px;
+  }
+
+  .phone-frame {
+    background:
+      radial-gradient(circle at 50% 16%, rgba(95, 120, 158, 0.14), transparent 34%),
+      linear-gradient(160deg, rgba(18, 26, 35, 0.98), rgba(10, 15, 21, 0.98));
+    border: 1px solid rgba(171, 185, 205, 0.28);
+    border-radius: 34px;
+    box-shadow: 0 24px 80px var(--shadow);
+    height: 812px;
+    max-height: calc(100vh - 32px);
+    min-height: 0;
+  }
+}
+
+@media (min-width: 640px) and (max-height: 760px) {
   .phone-frame {
     height: calc(100vh - 18px);
   }
+}
 
+@media (max-height: 760px) {
   .hero-icon,
   .success-icon {
     margin-top: 58px;

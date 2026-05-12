@@ -11,8 +11,10 @@ const refreshAction = document.querySelector(".refresh-action");
 const refreshNetworks = document.querySelector("#refresh-networks");
 const togglePassword = document.querySelector("#toggle-password");
 const connectButton = form.querySelector(".primary-action");
+const connectButtonLabel = connectButton.textContent;
 
 let selectedSsid = "";
+let isConnecting = false;
 
 const icons = {
   checkCircle: `
@@ -64,7 +66,13 @@ function setNetworkHelper(text) {
 }
 
 function updateConnectState() {
-  connectButton.disabled = !(selectedSsid && password.value.length > 0);
+  connectButton.disabled = isConnecting || !(selectedSsid && password.value.length > 0);
+}
+
+function setConnectionLoading(isLoading) {
+  isConnecting = isLoading;
+  connectButton.textContent = isLoading ? "Connecting..." : connectButtonLabel;
+  updateConnectState();
 }
 
 function setRefreshLoading(isLoading) {
@@ -201,10 +209,6 @@ continueButton.addEventListener("click", () => {
   showScreen("select");
 });
 
-for (const backButton of document.querySelectorAll("[data-back]")) {
-  backButton.addEventListener("click", () => showScreen(backButton.dataset.back));
-}
-
 togglePassword.addEventListener("click", () => {
   const shouldShow = password.type === "password";
   password.type = shouldShow ? "text" : "password";
@@ -221,6 +225,9 @@ refreshNetworks.addEventListener("click", () => {
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
+  if (isConnecting) {
+    return;
+  }
   if (!selectedSsid) {
     setMessage("Select a Wi-Fi network first.");
     updateConnectState();
@@ -231,9 +238,8 @@ form.addEventListener("submit", async (event) => {
     password: password.value,
   };
 
-  connectButton.disabled = true;
+  setConnectionLoading(true);
   setMessage("");
-  showScreen("connecting");
 
   try {
     const response = await fetch("/api/wifi", {
@@ -247,13 +253,11 @@ form.addEventListener("submit", async (event) => {
     }
     form.reset();
     selectedSsid = "";
-    updateConnectState();
     showScreen("success");
   } catch (error) {
-    showScreen("select");
     setMessage(error.message);
   } finally {
-    updateConnectState();
+    setConnectionLoading(false);
   }
 });
 
