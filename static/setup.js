@@ -69,6 +69,7 @@ function updateConnectState() {
 
 function setRefreshLoading(isLoading) {
   refreshNetworks.disabled = isLoading;
+  refreshAction.classList.toggle("is-loading", isLoading);
   refreshNetworks.classList.toggle("is-loading", isLoading);
   refreshNetworks.setAttribute("aria-label", isLoading ? "Refreshing networks" : "Refresh networks");
   if (isLoading) {

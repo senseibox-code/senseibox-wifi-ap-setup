@@ -305,6 +305,10 @@ p {
   user-select: none;
 }
 
+.refresh-action.is-loading label {
+  display: none;
+}
+
 .refresh-button {
   background: transparent;
   border: 0;
