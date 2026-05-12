@@ -516,9 +516,13 @@ p {
   color: var(--muted);
   font-size: 0.96rem;
   line-height: 1.45;
-  margin: 14px 0 0;
+  margin: 0 0 14px;
   max-width: none;
   text-align: left;
+}
+
+.network-helper:empty {
+  display: none;
 }
 
 #wifi-form {
