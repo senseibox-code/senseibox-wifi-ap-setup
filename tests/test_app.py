@@ -4,7 +4,7 @@ from pathlib import Path
 
 from starlette.testclient import TestClient
 
-from senseibox_wifi_ap_mode.app import WifiConfigStore, create_app
+from senseibox_wifi_ap_mode.app import DEV_CONFIG_PATH, WifiConfigStore, create_app
 from senseibox_wifi_ap_mode.fake_network import FakeNetworkManagerClient
 from senseibox_wifi_ap_mode.network import WifiNetwork
 
@@ -54,6 +54,23 @@ def test_wifi_configuration_requires_ssid(tmp_path: Path):
     assert response.json() == {"error": "SSID is required."}
 
 
+def test_wifi_save_failure_returns_safe_error(tmp_path: Path):
+    blocked_parent = tmp_path / "state"
+    blocked_parent.write_text("not a directory", encoding="utf-8")
+    client = TestClient(create_app(WifiConfigStore(blocked_parent / "network.json")))
+
+    response = client.post(
+        "/api/wifi",
+        json={"ssid": "Senseibox Lab", "password": "test-password"},
+    )
+
+    assert response.status_code == 500
+    assert response.json() == {
+        "saved": False,
+        "error": "Unable to save Wi-Fi credentials.",
+    }
+
+
 def test_api_networks_returns_scan_results(tmp_path: Path):
     client = TestClient(
         create_app(
@@ -98,6 +115,14 @@ def test_fake_network_mode_returns_design_networks(tmp_path: Path):
         "Guest_Network",
     ]
     assert len(networks) > 5
+
+
+def test_fake_network_development_store_uses_local_state_by_default(monkeypatch):
+    monkeypatch.delenv("SENSEIBOX_WIFI_CONFIG", raising=False)
+
+    store = WifiConfigStore.for_development()
+
+    assert store.path == DEV_CONFIG_PATH
 
 
 def test_fake_network_mode_connects_without_ap_service(tmp_path: Path):

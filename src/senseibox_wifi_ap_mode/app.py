@@ -28,6 +28,7 @@ ROOT = Path(__file__).resolve().parents[2]
 STATIC = ROOT / "static"
 VERSION_FILE = ROOT / "VERSION"
 DEFAULT_CONFIG_PATH = DEFAULT_STATE_DIR / "network.json"
+DEV_CONFIG_PATH = ROOT / ".dev-state" / "network.json"
 LOGGER = logging.getLogger("senseibox_wifi_ap_mode")
 
 
@@ -51,9 +52,13 @@ class WifiConfigStore:
     path: Path
 
     @classmethod
-    def from_environment(cls) -> "WifiConfigStore":
+    def from_environment(cls, default_path: Path = DEFAULT_CONFIG_PATH) -> "WifiConfigStore":
         configured = os.environ.get("SENSEIBOX_WIFI_CONFIG")
-        return cls(Path(configured) if configured else DEFAULT_CONFIG_PATH)
+        return cls(Path(configured) if configured else default_path)
+
+    @classmethod
+    def for_development(cls) -> "WifiConfigStore":
+        return cls.from_environment(default_path=DEV_CONFIG_PATH)
 
     def write(self, ssid: str, password: str) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
@@ -78,6 +83,16 @@ class WifiConfigStore:
 
 def _bad_request(message: str) -> JSONResponse:
     return JSONResponse({"error": message}, status_code=400)
+
+
+def _save_error(connect_on_submit: bool) -> JSONResponse:
+    payload: dict[str, bool | str] = {
+        "saved": False,
+        "error": "Unable to save Wi-Fi credentials.",
+    }
+    if connect_on_submit:
+        payload["connected"] = False
+    return JSONResponse(payload, status_code=500)
 
 
 async def homepage(_request: Request) -> FileResponse:
@@ -151,7 +166,12 @@ async def api_configure_wifi(request: Request) -> JSONResponse:
         if service is not None:
             service.state.name = "setup_complete"
 
-    store.write(ssid, password)
+    try:
+        store.write(ssid, password)
+    except OSError as error:
+        LOGGER.error("Failed to save Wi-Fi credentials: %s", error)
+        return _save_error(request.app.state.connect_on_submit)
+
     payload: dict[str, bool] = {"saved": True}
     if request.app.state.connect_on_submit:
         payload["connected"] = True
@@ -217,6 +237,7 @@ def main() -> None:
     if args.fake_network:
         LOGGER.info("Using fake Wi-Fi data; NetworkManager, hostapd, and dnsmasq will not be controlled.")
         app_instance = create_app(
+            config_store=WifiConfigStore.for_development(),
             network_manager=FakeNetworkManagerClient(),
             connect_on_submit=True,
         )

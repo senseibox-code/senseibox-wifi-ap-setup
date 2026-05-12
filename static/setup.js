@@ -113,13 +113,21 @@ function renderNetworkMessage(text) {
   setNetworkHelper(text);
 }
 
+async function readJsonResponse(response) {
+  try {
+    return await response.json();
+  } catch (_error) {
+    return {};
+  }
+}
+
 async function loadNetworks() {
   refreshNetworks.disabled = true;
   networkCard.setAttribute("aria-busy", "true");
   renderNetworkMessage("Scanning networks...");
   try {
     const response = await fetch("/api/networks");
-    const body = await response.json();
+    const body = await readJsonResponse(response);
     if (!response.ok) {
       throw new Error(body.error || "Unable to scan networks.");
     }
@@ -186,9 +194,9 @@ form.addEventListener("submit", async (event) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
-    const body = await response.json();
+    const body = await readJsonResponse(response);
     if (!response.ok) {
-      throw new Error(body.error || "Unable to connect to Wi-Fi.");
+      throw new Error(body.error || "Unable to connect to Wi-Fi. Check the password and try again.");
     }
     form.reset();
     showScreen("success");

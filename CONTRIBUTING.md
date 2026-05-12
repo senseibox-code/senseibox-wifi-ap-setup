@@ -13,7 +13,7 @@ pip install -e ".[dev]"
 senseibox-wifi-ap-mode --host 127.0.0.1 --port 8080 --fake-network
 ```
 
-Use `--fake-network` for local UI and API work on machines without NetworkManager Wi-Fi hardware. It serves realistic Wi-Fi scan data and fake connection results without starting AP mode or touching NetworkManager, `hostapd`, or `dnsmasq`. Full AP mode still needs Linux hardware or a suitable Linux VM.
+Use `--fake-network` for local UI and API work on machines without NetworkManager Wi-Fi hardware. It serves realistic Wi-Fi scan data and fake connection results without starting AP mode or touching NetworkManager, `hostapd`, or `dnsmasq`. Submitted test credentials are written to `.dev-state/network.json` by default. Full AP mode still needs Linux hardware or a suitable Linux VM.
 
 The app is intentionally small:
 
