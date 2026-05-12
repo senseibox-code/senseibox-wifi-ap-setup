@@ -2,6 +2,8 @@
 
 Wi-Fi onboarding service for Senseibox. It starts a local setup page in access point mode, captures Wi-Fi credentials, and stores the network configuration for the device to use on reconnect.
 
+![Senseibox Wi-Fi AP mode onboarding screens](static/assets/senseibox_wifi_ap_mode.png)
+
 ## Install
 
 ```sh
