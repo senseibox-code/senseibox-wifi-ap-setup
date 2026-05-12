@@ -44,6 +44,27 @@ class FakeNetworkManagerClient:
                 frequency="2412 MHz",
                 connected=False,
             ),
+            WifiNetwork(
+                ssid="Studio_WiFi",
+                signal=31,
+                security="WPA2",
+                frequency="2437 MHz",
+                connected=False,
+            ),
+            WifiNetwork(
+                ssid="Workshop_2G",
+                signal=24,
+                security="WPA2",
+                frequency="2462 MHz",
+                connected=False,
+            ),
+            WifiNetwork(
+                ssid="Open_Setup_Test",
+                signal=18,
+                security="open",
+                frequency="2412 MHz",
+                connected=False,
+            ),
         ]
 
     def select_ap_interface(self) -> WirelessInterface:

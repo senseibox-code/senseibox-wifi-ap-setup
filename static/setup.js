@@ -8,6 +8,7 @@ const networkCard = document.querySelector(".network-card");
 const networkHelper = document.querySelector("#network-helper");
 const networkList = document.querySelector("#network-list");
 const password = document.querySelector("#password");
+const refreshNetworks = document.querySelector("#refresh-networks");
 const togglePassword = document.querySelector("#toggle-password");
 
 let selectedSsid = "";
@@ -113,6 +114,8 @@ function renderNetworkMessage(text) {
 }
 
 async function loadNetworks() {
+  refreshNetworks.disabled = true;
+  networkCard.setAttribute("aria-busy", "true");
   renderNetworkMessage("Scanning networks...");
   try {
     const response = await fetch("/api/networks");
@@ -124,15 +127,20 @@ async function loadNetworks() {
       renderNetworkMessage("No Wi-Fi networks found. Move closer to your router, then try again.");
       return;
     }
-    selectedSsid = selectedSsid || body.networks[0].ssid;
+    if (!body.networks.some((network) => network.ssid === selectedSsid)) {
+      selectedSsid = body.networks[0].ssid;
+    }
     setNetworkHelper("");
     networkList.innerHTML = "";
-    for (const network of body.networks.slice(0, 5)) {
+    for (const network of body.networks) {
       networkList.append(renderNetwork(network));
     }
   } catch (error) {
     renderNetworkMessage("Unable to scan Wi-Fi networks.");
     setMessage(error.message);
+  } finally {
+    refreshNetworks.disabled = false;
+    networkCard.removeAttribute("aria-busy");
   }
 }
 
@@ -149,6 +157,11 @@ togglePassword.addEventListener("click", () => {
   password.type = shouldShow ? "text" : "password";
   togglePassword.setAttribute("aria-label", shouldShow ? "Hide password" : "Show password");
   togglePassword.innerHTML = shouldShow ? icons.eyeOff : icons.eye;
+});
+
+refreshNetworks.addEventListener("click", () => {
+  setMessage("");
+  loadNetworks();
 });
 
 form.addEventListener("submit", async (event) => {

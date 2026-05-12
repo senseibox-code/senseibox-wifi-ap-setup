@@ -90,13 +90,14 @@ def test_fake_network_mode_returns_design_networks(tmp_path: Path):
 
     assert response.status_code == 200
     networks = response.json()["networks"]
-    assert [network["ssid"] for network in networks] == [
+    assert [network["ssid"] for network in networks[:5]] == [
         "Home_Network_5G",
         "Home_Network_2G",
         "Office_WiFi",
         "Cafe_WiFi",
         "Guest_Network",
     ]
+    assert len(networks) > 5
 
 
 def test_fake_network_mode_connects_without_ap_service(tmp_path: Path):

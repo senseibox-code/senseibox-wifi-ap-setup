@@ -278,12 +278,49 @@ p {
   max-width: 292px;
 }
 
+.network-panel {
+  margin-top: 42px;
+  position: relative;
+}
+
+.refresh-button {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--blue);
+  height: 36px;
+  position: absolute;
+  right: 0;
+  top: -48px;
+  width: 36px;
+}
+
+.refresh-button:disabled {
+  cursor: wait;
+  opacity: 0.5;
+}
+
 .network-card {
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 9px;
-  margin-top: 42px;
-  overflow: hidden;
+  max-height: 270px;
+  overflow-y: auto;
+  scrollbar-color: rgba(120, 160, 255, 0.72) rgba(255, 255, 255, 0.04);
+  scrollbar-width: thin;
+}
+
+.network-card::-webkit-scrollbar {
+  width: 8px;
+}
+
+.network-card::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 999px;
+}
+
+.network-card::-webkit-scrollbar-thumb {
+  background: rgba(120, 160, 255, 0.72);
+  border-radius: 999px;
 }
 
 .network-card-empty {
@@ -536,6 +573,10 @@ input:focus {
   }
 
   .network-card {
+    max-height: 216px;
+  }
+
+  .network-panel {
     margin-top: 28px;
   }
 
