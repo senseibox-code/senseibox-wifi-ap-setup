@@ -273,25 +273,15 @@ p {
   margin-top: 88px;
 }
 
-.screen-heading p {
-  margin-top: 14px;
-  max-width: 292px;
-}
-
 .network-panel {
-  margin-top: 42px;
-  position: relative;
+  margin-top: 64px;
 }
 
 .refresh-button {
-  border: 1px solid var(--border);
-  border-radius: 999px;
   color: var(--blue);
-  height: 36px;
-  position: absolute;
-  right: 0;
-  top: -48px;
-  width: 36px;
+  height: 42px;
+  margin: 24px auto 0;
+  width: 42px;
 }
 
 .refresh-button:disabled {
@@ -576,7 +566,7 @@ input:focus {
   }
 
   .network-panel {
-    margin-top: 28px;
+    margin-top: 38px;
   }
 
   #wifi-form {
