@@ -720,12 +720,10 @@ input:focus {
 .notice,
 .dashboard-link {
   align-items: center;
-  background: rgba(255, 255, 255, 0.035);
-  border: 1px solid var(--border);
-  border-radius: 8px;
   color: var(--muted);
   display: flex;
   gap: 12px;
+  justify-content: center;
   min-height: 58px;
   padding: 0 16px;
 }
