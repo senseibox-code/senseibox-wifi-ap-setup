@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import asyncio
 import os
 import json
 import logging
@@ -118,6 +119,9 @@ async def api_status(request: Request) -> JSONResponse:
 async def api_networks(request: Request) -> JSONResponse:
     network_manager: NetworkManagerClient = request.app.state.network_manager
     try:
+        scan_delay_seconds = getattr(network_manager, "scan_delay_seconds", 0)
+        if scan_delay_seconds:
+            await asyncio.sleep(scan_delay_seconds)
         networks = network_manager.scan_wifi()
     except Exception:
         LOGGER.exception("Wi-Fi scan failed.")
@@ -238,7 +242,7 @@ def main() -> None:
         LOGGER.info("Using fake Wi-Fi data; NetworkManager, hostapd, and dnsmasq will not be controlled.")
         app_instance = create_app(
             config_store=WifiConfigStore.for_development(),
-            network_manager=FakeNetworkManagerClient(),
+            network_manager=FakeNetworkManagerClient(scan_delay_seconds=6),
             connect_on_submit=True,
         )
     elif not args.web_only:

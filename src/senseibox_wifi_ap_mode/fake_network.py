@@ -7,6 +7,9 @@ from .network import WirelessInterface
 class FakeNetworkManagerClient:
     """NetworkManager-compatible fake data source for development."""
 
+    def __init__(self, scan_delay_seconds: float = 0) -> None:
+        self.scan_delay_seconds = scan_delay_seconds
+
     def scan_wifi(self) -> list[WifiNetwork]:
         return [
             WifiNetwork(

@@ -7,6 +7,7 @@ const message = document.querySelector("#message");
 const networkHelper = document.querySelector("#network-helper");
 const networkList = document.querySelector("#network-list");
 const password = document.querySelector("#password");
+const refreshAction = document.querySelector(".refresh-action");
 const refreshNetworks = document.querySelector("#refresh-networks");
 const togglePassword = document.querySelector("#toggle-password");
 const connectButton = form.querySelector(".primary-action");
@@ -64,6 +65,19 @@ function setNetworkHelper(text) {
 
 function updateConnectState() {
   connectButton.disabled = !(selectedSsid && password.value.length > 0);
+}
+
+function setRefreshLoading(isLoading) {
+  refreshNetworks.disabled = isLoading;
+  refreshNetworks.classList.toggle("is-loading", isLoading);
+  refreshNetworks.setAttribute("aria-label", isLoading ? "Refreshing networks" : "Refresh networks");
+  if (isLoading) {
+    refreshAction.setAttribute("role", "status");
+    refreshAction.setAttribute("aria-label", "Refreshing networks");
+  } else {
+    refreshAction.removeAttribute("role");
+    refreshAction.removeAttribute("aria-label");
+  }
 }
 
 function networkSecurity(network) {
@@ -149,7 +163,7 @@ async function readJsonResponse(response) {
 }
 
 async function loadNetworks() {
-  refreshNetworks.disabled = true;
+  setRefreshLoading(true);
   networkList.setAttribute("aria-busy", "true");
   renderNetworkMessage("Scanning networks...");
   try {
@@ -177,7 +191,7 @@ async function loadNetworks() {
     selectedSsid = "";
     updateConnectState();
   } finally {
-    refreshNetworks.disabled = false;
+    setRefreshLoading(false);
     networkList.removeAttribute("aria-busy");
   }
 }
