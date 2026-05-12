@@ -9,6 +9,7 @@ const networkList = document.querySelector("#network-list");
 const password = document.querySelector("#password");
 const refreshNetworks = document.querySelector("#refresh-networks");
 const togglePassword = document.querySelector("#toggle-password");
+const connectButton = form.querySelector(".primary-action");
 
 let selectedSsid = "";
 
@@ -61,6 +62,10 @@ function setNetworkHelper(text) {
   networkHelper.textContent = text;
 }
 
+function updateConnectState() {
+  connectButton.disabled = !(selectedSsid && password.value.length > 0);
+}
+
 function networkSecurity(network) {
   return network.security && network.security !== "open" ? "locked" : "open";
 }
@@ -83,6 +88,7 @@ function selectNetwork(name) {
       tickIcon.hidden = !isSelected;
     }
   }
+  updateConnectState();
 }
 
 function renderNetwork(network) {
@@ -157,16 +163,19 @@ async function loadNetworks() {
       return;
     }
     if (!body.networks.some((network) => network.ssid === selectedSsid)) {
-      selectedSsid = body.networks[0].ssid;
+      selectedSsid = "";
     }
     setNetworkHelper("");
     networkList.innerHTML = "";
     for (const network of body.networks) {
       networkList.append(renderNetwork(network));
     }
+    updateConnectState();
   } catch (error) {
     renderNetworkMessage("Unable to scan Wi-Fi networks.");
     setMessage(error.message);
+    selectedSsid = "";
+    updateConnectState();
   } finally {
     refreshNetworks.disabled = false;
     networkList.removeAttribute("aria-busy");
@@ -188,6 +197,8 @@ togglePassword.addEventListener("click", () => {
   togglePassword.innerHTML = shouldShow ? icons.eyeOff : icons.eye;
 });
 
+password.addEventListener("input", updateConnectState);
+
 refreshNetworks.addEventListener("click", () => {
   setMessage("");
   loadNetworks();
@@ -195,9 +206,9 @@ refreshNetworks.addEventListener("click", () => {
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
-  const button = form.querySelector(".primary-action");
   if (!selectedSsid) {
     setMessage("Select a Wi-Fi network first.");
+    updateConnectState();
     return;
   }
   const payload = {
@@ -205,7 +216,7 @@ form.addEventListener("submit", async (event) => {
     password: password.value,
   };
 
-  button.disabled = true;
+  connectButton.disabled = true;
   setMessage("");
   showScreen("connecting");
 
@@ -220,12 +231,14 @@ form.addEventListener("submit", async (event) => {
       throw new Error(body.error || "Unable to connect to Wi-Fi. Check the password and try again.");
     }
     form.reset();
+    selectedSsid = "";
+    updateConnectState();
     showScreen("success");
   } catch (error) {
     showScreen("select");
     setMessage(error.message);
   } finally {
-    button.disabled = false;
+    updateConnectState();
   }
 });
 
