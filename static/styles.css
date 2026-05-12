@@ -20,12 +20,7 @@
 }
 
 body {
-  background:
-    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-    radial-gradient(circle at 50% 0%, rgba(72, 96, 128, 0.16), transparent 46%),
-    var(--bg);
-  background-size: 18px 18px, 18px 18px, auto, auto;
+  background: radial-gradient(circle at top, #132033 0, var(--bg) 42%);
   margin: 0;
   min-height: 100vh;
 }
@@ -273,15 +268,45 @@ p {
   margin-top: 88px;
 }
 
-.network-panel {
-  margin-top: 64px;
+.network-heading {
+  align-items: center;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  margin-top: 82px;
+  text-align: left;
+}
+
+.network-heading h1 {
+  font-size: 1.78rem;
+  line-height: 1.15;
+}
+
+.refresh-action {
+  align-items: center;
+  color: var(--muted);
+  display: flex;
+  flex-shrink: 0;
+  gap: 8px;
+}
+
+.refresh-action label {
+  cursor: pointer;
+  font-size: 0.98rem;
+  user-select: none;
 }
 
 .refresh-button {
-  color: var(--blue);
+  background: rgba(143, 211, 255, 0.08);
+  border: 1px solid rgba(143, 211, 255, 0.28);
+  border-radius: 999px;
+  color: #8fd3ff;
   height: 38px;
-  margin: 6px auto 0;
   width: 38px;
+}
+
+.refresh-button:hover {
+  background: rgba(143, 211, 255, 0.14);
 }
 
 .refresh-button:disabled {
@@ -289,32 +314,103 @@ p {
   opacity: 0.5;
 }
 
-.network-card {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 9px;
+.network-list {
+  display: grid;
+  gap: 10px;
+  list-style: none;
+  margin: 24px 0 0;
   max-height: 218px;
   overflow-y: auto;
-  scrollbar-color: rgba(120, 160, 255, 0.72) rgba(255, 255, 255, 0.04);
+  padding: 0 8px 0 0;
+  scrollbar-color: #78a0ff rgba(255, 255, 255, 0.08);
   scrollbar-width: thin;
 }
 
-.network-card::-webkit-scrollbar {
+.network-list::-webkit-scrollbar {
   width: 8px;
 }
 
-.network-card::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.04);
+.network-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.08);
   border-radius: 999px;
 }
 
-.network-card::-webkit-scrollbar-thumb {
-  background: rgba(120, 160, 255, 0.72);
+.network-list::-webkit-scrollbar-thumb {
+  background: #78a0ff;
   border-radius: 999px;
 }
 
-.network-card-empty {
-  display: none;
+.network-list::-webkit-scrollbar-thumb:hover {
+  background: #91b2ff;
+}
+
+.network-list-item {
+  margin: 0;
+  padding: 0;
+}
+
+.network-option {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  gap: 16px;
+  justify-content: space-between;
+  padding: 14px 16px;
+  text-align: left;
+  width: 100%;
+}
+
+.network-option:hover {
+  background: rgba(143, 211, 255, 0.06);
+  border-color: rgba(143, 211, 255, 0.28);
+}
+
+.network-option.is-selected {
+  background: rgba(143, 211, 255, 0.12);
+  border-color: rgba(143, 211, 255, 0.52);
+}
+
+.network-main {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  min-width: 0;
+}
+
+.network-icon {
+  color: #8fd3ff;
+  flex-shrink: 0;
+  height: 20px;
+  width: 20px;
+}
+
+.network-name {
+  font-size: 0.96rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status-icon {
+  color: var(--muted);
+  flex-shrink: 0;
+  height: 20px;
+  width: 20px;
+}
+
+.tick-icon {
+  color: #8fd3ff;
+  stroke-width: 2.4;
+}
+
+.tick-icon .selected-icon {
+  fill: none;
+  stroke: currentColor;
 }
 
 .network-helper {
@@ -324,70 +420,6 @@ p {
   margin: 14px 0 0;
   max-width: none;
   text-align: left;
-}
-
-#network-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-#network-list li {
-  align-items: center;
-  border-bottom: 1px solid rgba(164, 178, 197, 0.08);
-  display: grid;
-  gap: 12px;
-  grid-template-columns: 24px 1fr 24px;
-  min-height: 54px;
-  padding: 0 14px;
-}
-
-#network-list li:last-child {
-  border-bottom: 0;
-}
-
-.network-button {
-  background: transparent;
-  border: 0;
-  color: #eef2f8;
-  cursor: pointer;
-  min-width: 0;
-  overflow: hidden;
-  padding: 0;
-  text-align: left;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.network-icon-wrap,
-.network-lock,
-.selected-icon {
-  color: var(--muted-strong);
-  text-align: center;
-}
-
-.network-icon-wrap,
-.network-status {
-  align-items: center;
-  display: flex;
-  justify-content: center;
-}
-
-.network-selected .network-icon,
-.selected-icon {
-  color: var(--blue);
-}
-
-.network-lock {
-  height: 19px;
-  width: 19px;
-}
-
-.selected-icon {
-  fill: var(--blue);
-  height: 23px;
-  stroke: #0d1420;
-  width: 23px;
 }
 
 #wifi-form {
@@ -561,12 +593,13 @@ input:focus {
     margin-top: 58px;
   }
 
-  .network-card {
-    max-height: 216px;
+  .network-heading {
+    margin-top: 58px;
   }
 
-  .network-panel {
-    margin-top: 38px;
+  .network-list {
+    margin-top: 18px;
+    max-height: 216px;
   }
 
   #wifi-form {

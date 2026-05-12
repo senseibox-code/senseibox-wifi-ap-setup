@@ -4,7 +4,6 @@ const screens = new Map(
 const continueButton = document.querySelector("#continue-button");
 const form = document.querySelector("#wifi-form");
 const message = document.querySelector("#message");
-const networkCard = document.querySelector(".network-card");
 const networkHelper = document.querySelector("#network-helper");
 const networkList = document.querySelector("#network-list");
 const password = document.querySelector("#password");
@@ -16,8 +15,7 @@ let selectedSsid = "";
 const icons = {
   checkCircle: `
     <svg class="svg-icon selected-icon" viewBox="0 0 24 24" aria-hidden="true">
-      <circle cx="12" cy="12" r="10" />
-      <path d="m7.5 12.5 3 3 6-7" />
+      <path d="M20 6 9 17l-5-5" />
     </svg>
   `,
   lock: `
@@ -61,7 +59,6 @@ function setMessage(text) {
 
 function setNetworkHelper(text) {
   networkHelper.textContent = text;
-  networkCard.classList.toggle("network-card-empty", Boolean(text));
 }
 
 function networkSecurity(network) {
@@ -72,39 +69,63 @@ function selectNetwork(name) {
   selectedSsid = name;
   for (const item of networkList.querySelectorAll("li")) {
     const isSelected = item.dataset.ssid === name;
-    item.classList.toggle("network-selected", isSelected);
-    const status = item.querySelector(".network-status");
-    if (status) {
-      status.innerHTML = isSelected ? icons.checkCircle : icons.lock;
-      status.hidden = !isSelected && item.dataset.security !== "locked";
+    const option = item.querySelector(".network-option");
+    const lockIcon = item.querySelector(".lock-icon");
+    const tickIcon = item.querySelector(".tick-icon");
+    if (option) {
+      option.classList.toggle("is-selected", isSelected);
+      option.setAttribute("aria-pressed", String(isSelected));
+    }
+    if (lockIcon) {
+      lockIcon.hidden = isSelected || item.dataset.security !== "locked";
+    }
+    if (tickIcon) {
+      tickIcon.hidden = !isSelected;
     }
   }
 }
 
 function renderNetwork(network) {
   const item = document.createElement("li");
+  const option = document.createElement("button");
+  const main = document.createElement("span");
   const icon = document.createElement("span");
-  const button = document.createElement("button");
-  const status = document.createElement("span");
+  const name = document.createElement("span");
+  const lockIcon = document.createElement("span");
+  const tickIcon = document.createElement("span");
   const isSelected = network.ssid === selectedSsid;
 
   item.dataset.ssid = network.ssid;
   item.dataset.security = networkSecurity(network);
-  item.className = isSelected ? "network-selected" : "";
+  item.className = "network-list-item";
 
-  icon.className = "network-icon-wrap";
+  option.className = "network-option";
+  option.type = "button";
+  option.setAttribute("aria-pressed", String(isSelected));
+  if (isSelected) {
+    option.classList.add("is-selected");
+  }
+  option.addEventListener("click", () => selectNetwork(network.ssid));
+
+  main.className = "network-main";
+
+  icon.className = "network-icon";
   icon.innerHTML = icons.wifi;
 
-  button.className = "network-button";
-  button.type = "button";
-  button.textContent = network.ssid;
-  button.addEventListener("click", () => selectNetwork(network.ssid));
+  name.className = "network-name";
+  name.textContent = network.ssid;
 
-  status.className = "network-status";
-  status.innerHTML = isSelected ? icons.checkCircle : icons.lock;
-  status.hidden = !isSelected && networkSecurity(network) !== "locked";
+  lockIcon.className = "status-icon lock-icon";
+  lockIcon.innerHTML = icons.lock;
+  lockIcon.hidden = isSelected || networkSecurity(network) !== "locked";
 
-  item.append(icon, button, status);
+  tickIcon.className = "status-icon tick-icon";
+  tickIcon.innerHTML = icons.checkCircle;
+  tickIcon.hidden = !isSelected;
+
+  main.append(icon, name);
+  option.append(main, lockIcon, tickIcon);
+  item.append(option);
   return item;
 }
 
@@ -123,7 +144,7 @@ async function readJsonResponse(response) {
 
 async function loadNetworks() {
   refreshNetworks.disabled = true;
-  networkCard.setAttribute("aria-busy", "true");
+  networkList.setAttribute("aria-busy", "true");
   renderNetworkMessage("Scanning networks...");
   try {
     const response = await fetch("/api/networks");
@@ -148,7 +169,7 @@ async function loadNetworks() {
     setMessage(error.message);
   } finally {
     refreshNetworks.disabled = false;
-    networkCard.removeAttribute("aria-busy");
+    networkList.removeAttribute("aria-busy");
   }
 }
 
