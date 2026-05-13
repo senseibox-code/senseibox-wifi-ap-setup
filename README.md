@@ -121,4 +121,4 @@ Fake network mode stores submitted test credentials in `.dev-state/network.json`
 
 ## License
 
-This software is licensed under the [GPL-3.0](LICENSE.md).
+This software is licensed under GPL-3.0.
