@@ -117,3 +117,8 @@ senseibox-wifi-ap-mode --host 127.0.0.1 --port 8080 --fake-network
 ```
 
 Fake network mode stores submitted test credentials in `.dev-state/network.json` by default so local development does not require the production `/opt/senseibox/senseibox-wifi-ap-mode/state` directory. Set `SENSEIBOX_WIFI_CONFIG` to override that path.
+
+
+## License
+
+This software is licensed under the [GPL-3.0](LICENSE.md).
