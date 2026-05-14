@@ -21,15 +21,41 @@ In `--boot` mode the service does this:
 5. Only if no usable wired or Wi-Fi connection is found does it start AP mode and expose the setup SSID.
 6. If a Wi-Fi profile exists but fails to connect, or connects without a default route, then it will start setup AP mode.
 
+## Before Installing
+
+Check that the target system can run Wi-Fi AP mode before installing the service:
+
+```sh
+ip a
+```
+
+```sh
+iw dev
+```
+
+```sh
+iw list
+```
+
+In the `iw list` output, check `Supported interface modes` and make sure the wireless adapter lists `AP`.
+
 ## Install
 
 ```sh
 sudo ./install.sh
 ```
 
-The installer deploys the app to `/opt/senseibox/senseibox-wifi-ap-mode`, creates or reuses the shared no-login `senseibox:senseibox` service account, installs a virtualenv under `/opt/senseibox/senseibox-wifi-ap-mode/.venv`, and starts the `senseibox-wifi-ap-mode` systemd service.
+The installer does the setup in these steps:
 
-It also installs the Debian runtime packages required for Wi-Fi setup and AP mode, including NetworkManager, `hostapd`, `dnsmasq`, Python venv support, `rsync`, and Wi-Fi/network utility packages.
+1. Installs the Debian/Ubuntu packages needed by the service.
+   This includes NetworkManager for Wi-Fi client mode, `hostapd` for AP mode, `dnsmasq` for DHCP, Python venv support, and Wi-Fi/network tools such as `iw`, `rfkill`, and `iproute2`.
+2. Installs installer support tools such as `rsync`.
+   `rsync` is used by `install.sh` to copy the current checkout into the product install directory; it is not part of the running Wi-Fi service.
+3. Creates or reuses the shared no-login service account `senseibox:senseibox`.
+4. Deploys the app to `/opt/senseibox/senseibox-wifi-ap-mode`.
+5. Creates the virtualenv at `/opt/senseibox/senseibox-wifi-ap-mode/.venv`.
+6. Installs the Python app into that virtualenv.
+7. Installs and starts the `senseibox-wifi-ap-mode` systemd service.
 
 AP setup mode reads deployment-specific settings from `/etc/senseibox/senseibox-wifi-ap-mode`. Before hardware AP testing, set the setup gateway and DHCP range there:
 
@@ -65,22 +91,10 @@ Follow service logs:
 sudo journalctl -u senseibox-wifi-ap-mode.service -f
 ```
 
-Check AP support services and wireless diagnostics:
+Check AP support services:
 
 ```sh
 sudo systemctl status hostapd
-```
-
-```sh
-ip a
-```
-
-```sh
-iw dev
-```
-
-```sh
-iw list
 ```
 
 ## API
