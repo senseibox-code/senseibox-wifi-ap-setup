@@ -23,12 +23,14 @@ from starlette.staticfiles import StaticFiles
 from .ap_mode import DEFAULT_STATE_DIR
 from .fake_network import FakeNetworkManagerClient
 from .network import NetworkManagerClient
+from .network_cache import WifiNetworkCache
 from .service import WifiSetupService
 
 ROOT = Path(__file__).resolve().parents[2]
 STATIC = ROOT / "static"
 VERSION_FILE = ROOT / "VERSION"
 DEFAULT_CONFIG_PATH = DEFAULT_STATE_DIR / "network.json"
+DEFAULT_NETWORK_CACHE_PATH = DEFAULT_STATE_DIR / "networks.json"
 DEV_CONFIG_PATH = ROOT / ".dev-state" / "network.json"
 LOGGER = logging.getLogger("senseibox_wifi_ap_mode")
 
@@ -118,6 +120,7 @@ async def api_status(request: Request) -> JSONResponse:
 
 async def api_networks(request: Request) -> JSONResponse:
     network_manager: NetworkManagerClient = request.app.state.network_manager
+    network_cache: WifiNetworkCache = request.app.state.network_cache
     try:
         scan_delay_seconds = getattr(network_manager, "scan_delay_seconds", 0)
         if scan_delay_seconds:
@@ -125,7 +128,9 @@ async def api_networks(request: Request) -> JSONResponse:
         networks = network_manager.scan_wifi()
     except Exception:
         LOGGER.exception("Wi-Fi scan failed.")
-        return JSONResponse({"error": "Unable to scan Wi-Fi networks."}, status_code=502)
+        networks = []
+    if not networks:
+        networks = network_cache.read()
     return JSONResponse({"networks": [asdict(network) for network in networks]})
 
 
@@ -188,6 +193,7 @@ def create_app(
     config_store: WifiConfigStore | None = None,
     *,
     network_manager: NetworkManagerClient | None = None,
+    network_cache: WifiNetworkCache | None = None,
     setup_service: WifiSetupService | None = None,
     connect_on_submit: bool = False,
     exit_on_connect: bool = False,
@@ -205,6 +211,9 @@ def create_app(
     )
     app.state.config_store = config_store or WifiConfigStore.from_environment()
     app.state.network_manager = network_manager or NetworkManagerClient()
+    app.state.network_cache = network_cache or (
+        setup_service.network_cache if setup_service else WifiNetworkCache(DEFAULT_NETWORK_CACHE_PATH)
+    )
     app.state.setup_service = setup_service
     app.state.connect_on_submit = connect_on_submit
     app.state.exit_on_connect = exit_on_connect

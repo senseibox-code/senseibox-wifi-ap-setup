@@ -10,6 +10,7 @@ from threading import Timer
 from .ap_mode import AccessPointManager, AccessPointSettings, DEFAULT_STATE_DIR
 from .commands import CommandRunner
 from .network import NetworkManagerClient, NetworkProbe, WirelessInterface
+from .network_cache import WifiNetworkCache
 
 
 LOGGER = logging.getLogger("senseibox_wifi_ap_mode")
@@ -38,6 +39,7 @@ class WifiSetupService:
         self.runner = runner or CommandRunner()
         self.network_manager = network_manager or NetworkManagerClient(self.runner)
         self.probe = probe or NetworkProbe(self.runner)
+        self.network_cache = WifiNetworkCache(state_dir / "networks.json")
         self.ap_manager = ap_manager or AccessPointManager(
             state_dir=state_dir,
             runner=self.runner,
@@ -75,12 +77,31 @@ class WifiSetupService:
 
     def restart_setup_mode(self, interface: WirelessInterface) -> None:
         settings = AccessPointSettings.from_environment(self.state_dir)
+        try:
+            self.ap_manager.stop(interface.name)
+        except Exception:
+            LOGGER.exception("Unable to restore Wi-Fi client mode before setup scan.")
+        self._cache_wifi_scan()
         self.ap_manager.start(interface, settings)
         self.state.ap_interface = interface
         self.state.name = "ap_running"
         self.state.setup_deadline_seconds = self.setup_timeout_seconds
         self._start_setup_timeout()
         LOGGER.info("Setup AP mode started on interface %s.", interface.name)
+
+    def _cache_wifi_scan(self) -> None:
+        try:
+            networks = self.network_manager.scan_wifi()
+        except Exception:
+            LOGGER.exception("Unable to cache Wi-Fi scan before starting setup AP mode.")
+            return
+        if not networks:
+            LOGGER.warning("Wi-Fi scan completed before AP mode, but no networks were found.")
+            return
+        try:
+            self.network_cache.write(networks)
+        except OSError:
+            LOGGER.exception("Unable to write Wi-Fi scan cache.")
 
     def stop_setup_mode(self) -> None:
         self._cancel_setup_timeout()

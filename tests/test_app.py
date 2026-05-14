@@ -7,6 +7,7 @@ from starlette.testclient import TestClient
 from senseibox_wifi_ap_mode.app import DEV_CONFIG_PATH, WifiConfigStore, create_app
 from senseibox_wifi_ap_mode.fake_network import FakeNetworkManagerClient
 from senseibox_wifi_ap_mode.network import WifiNetwork
+from senseibox_wifi_ap_mode.network_cache import WifiNetworkCache
 
 
 class FakeNetworkManager:
@@ -20,6 +21,11 @@ class FakeNetworkManager:
                 connected=False,
             )
         ]
+
+
+class EmptyNetworkManager:
+    def scan_wifi(self):
+        return []
 
 
 def test_api_version():
@@ -93,6 +99,33 @@ def test_api_networks_returns_scan_results(tmp_path: Path):
             }
         ]
     }
+
+
+def test_api_networks_falls_back_to_cached_setup_scan(tmp_path: Path):
+    cache = WifiNetworkCache(tmp_path / "networks.json")
+    cache.write(
+        [
+            WifiNetwork(
+                ssid="Cached Network",
+                signal=80,
+                security="WPA2",
+                frequency="2462 MHz",
+                connected=False,
+            )
+        ]
+    )
+    client = TestClient(
+        create_app(
+            WifiConfigStore(tmp_path / "network.json"),
+            network_manager=EmptyNetworkManager(),
+            network_cache=cache,
+        )
+    )
+
+    response = client.get("/api/networks")
+
+    assert response.status_code == 200
+    assert response.json()["networks"][0]["ssid"] == "Cached Network"
 
 
 def test_fake_network_mode_returns_design_networks(tmp_path: Path):
