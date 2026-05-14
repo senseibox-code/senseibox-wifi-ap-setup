@@ -20,6 +20,7 @@ LOGGER = logging.getLogger("senseibox_wifi_ap_mode")
 class ServiceState:
     name: str = "checking_network"
     ap_interface: WirelessInterface | None = None
+    client_interface: WirelessInterface | None = None
     last_error: str | None = None
     setup_deadline_seconds: int | None = None
 
@@ -81,6 +82,7 @@ class WifiSetupService:
             self.ap_manager.stop(interface.name)
         except Exception:
             LOGGER.exception("Unable to restore Wi-Fi client mode before setup scan.")
+        self.state.client_interface = self.network_manager.create_client_interface(interface.name)
         self._cache_wifi_scan()
         self.ap_manager.start(interface, settings)
         self.state.ap_interface = interface
@@ -111,6 +113,10 @@ class WifiSetupService:
         LOGGER.info("Setup AP mode stopped on interface %s.", self.state.ap_interface.name)
         self.state.ap_interface = None
         self.state.setup_deadline_seconds = None
+
+    def complete_setup_mode(self) -> None:
+        self.stop_setup_mode()
+        self.state.name = "setup_complete"
 
     def _start_setup_timeout(self) -> None:
         self._cancel_setup_timeout()

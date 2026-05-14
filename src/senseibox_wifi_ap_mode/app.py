@@ -39,6 +39,11 @@ def _exit_after_response() -> None:
     threading.Timer(1.0, lambda: os._exit(0)).start()
 
 
+def _complete_setup_after_response(service: WifiSetupService) -> None:
+    service.complete_setup_mode()
+    _exit_after_response()
+
+
 def app_version() -> str:
     try:
         version = VERSION_FILE.read_text(encoding="utf-8").strip()
@@ -113,6 +118,7 @@ async def api_status(request: Request) -> JSONResponse:
     if service is not None:
         payload["state"] = service.state.name
         payload["ap_interface"] = service.state.ap_interface.name if service.state.ap_interface else None
+        payload["client_interface"] = service.state.client_interface.name if service.state.client_interface else None
         payload["last_error"] = service.state.last_error
         payload["setup_timeout_seconds"] = service.state.setup_deadline_seconds
     return JSONResponse(payload)
@@ -152,11 +158,9 @@ async def api_configure_wifi(request: Request) -> JSONResponse:
     if request.app.state.connect_on_submit:
         service: WifiSetupService | None = request.app.state.setup_service
         network_manager: NetworkManagerClient | FakeNetworkManagerClient = request.app.state.network_manager
-        interface = service.state.ap_interface if service is not None else None
+        interface = service.state.client_interface if service is not None else None
         if interface is None:
             interface = network_manager.select_ap_interface()
-        if service is not None and interface is not None:
-            service.stop_setup_mode()
         if service is not None:
             service.state.name = "connecting_to_wifi"
         LOGGER.info("Wi-Fi credentials submitted; attempting connection to selected network.")
@@ -166,11 +170,6 @@ async def api_configure_wifi(request: Request) -> JSONResponse:
                 service.state.name = "wifi_failure"
                 service.state.last_error = "Wi-Fi connection attempt failed."
             LOGGER.warning("Wi-Fi connection attempt failed; restarting setup AP mode.")
-            if service is not None and interface is not None:
-                try:
-                    service.restart_setup_mode(interface)
-                except Exception:
-                    LOGGER.exception("Failed to restart setup AP mode after Wi-Fi failure.")
             return JSONResponse({"saved": False, "connected": False, "error": "Unable to connect to Wi-Fi."}, status_code=502)
         if service is not None:
             service.state.name = "setup_complete"
@@ -184,6 +183,9 @@ async def api_configure_wifi(request: Request) -> JSONResponse:
     payload: dict[str, bool] = {"saved": True}
     if request.app.state.connect_on_submit:
         payload["connected"] = True
+        service = request.app.state.setup_service
+        if request.app.state.exit_on_connect and service is not None:
+            return JSONResponse(payload, background=BackgroundTask(_complete_setup_after_response, service))
         if request.app.state.exit_on_connect:
             return JSONResponse(payload, background=BackgroundTask(_exit_after_response))
     return JSONResponse(payload)

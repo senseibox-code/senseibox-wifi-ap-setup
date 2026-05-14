@@ -28,6 +28,41 @@ class EmptyNetworkManager:
         return []
 
 
+class ConnectTrackingNetworkManager:
+    def __init__(self) -> None:
+        self.connected_with: tuple[str, str, str | None] | None = None
+
+    def scan_wifi(self):
+        return []
+
+    def connect_wifi(self, ssid: str, password: str, interface: str | None = None) -> bool:
+        self.connected_with = (ssid, password, interface)
+        return True
+
+    def select_ap_interface(self):
+        return None
+
+
+class FakeSetupService:
+    def __init__(self) -> None:
+        self.state = type(
+            "State",
+            (),
+            {
+                "name": "ap_running",
+                "ap_interface": None,
+                "client_interface": type("Interface", (), {"name": "sta0"})(),
+                "last_error": None,
+                "setup_deadline_seconds": 600,
+            },
+        )()
+        self.network_cache = WifiNetworkCache(Path("/missing/networks.json"))
+        self.completed = False
+
+    def complete_setup_mode(self) -> None:
+        self.completed = True
+
+
 def test_api_version():
     client = TestClient(create_app())
 
@@ -204,3 +239,28 @@ def test_fake_network_mode_can_return_connection_failure(tmp_path: Path):
         "error": "Unable to connect to Wi-Fi.",
     }
     assert not config_path.exists()
+
+
+def test_real_setup_connects_on_client_interface_before_completing_setup(tmp_path: Path):
+    config_path = tmp_path / "network.json"
+    network_manager = ConnectTrackingNetworkManager()
+    setup_service = FakeSetupService()
+    client = TestClient(
+        create_app(
+            WifiConfigStore(config_path),
+            network_manager=network_manager,
+            setup_service=setup_service,
+            connect_on_submit=True,
+            exit_on_connect=True,
+        )
+    )
+
+    response = client.post(
+        "/api/wifi",
+        json={"ssid": "Senseibox Lab", "password": "test-password"},
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {"saved": True, "connected": True}
+    assert network_manager.connected_with == ("Senseibox Lab", "test-password", "sta0")
+    assert setup_service.completed is True

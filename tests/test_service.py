@@ -14,6 +14,10 @@ class FakeNetworkManager:
     def select_ap_interface(self) -> WirelessInterface:
         return self.interface
 
+    def create_client_interface(self, ap_interface: str) -> WirelessInterface:
+        _ = ap_interface
+        return WirelessInterface("sta0", "phy0")
+
     def scan_wifi(self) -> list[WifiNetwork]:
         return [
             WifiNetwork(
@@ -56,6 +60,7 @@ def test_setup_timeout_state_is_set_and_cleared(tmp_path: Path, monkeypatch):
 
     assert selected == interface
     assert service.state.name == "ap_running"
+    assert service.state.client_interface == WirelessInterface("sta0", "phy0")
     assert service.state.setup_deadline_seconds == 600
     assert ap_manager.started == ["setup0"]
 

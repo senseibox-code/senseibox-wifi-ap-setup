@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 
 from .commands import CommandRunner
 
@@ -118,6 +119,7 @@ def parse_nmcli_wifi_list(output: str) -> list[WifiNetwork]:
 class NetworkManagerClient:
     def __init__(self, runner: CommandRunner | None = None) -> None:
         self.runner = runner or CommandRunner()
+        self.client_interface: str | None = None
 
     def wireless_interfaces(self) -> list[WirelessInterface]:
         result = self.runner.run(["iw", "dev"], timeout=5)
@@ -141,22 +143,29 @@ class NetworkManagerClient:
             check=True,
         )
 
+    def create_client_interface(self, ap_interface: str, *, name: str = "sta0") -> WirelessInterface:
+        if not self._interface_exists(name):
+            self.runner.run(["iw", "dev", ap_interface, "interface", "add", name, "type", "managed"], timeout=10, check=True)
+            self.runner.run(["ip", "link", "set", "dev", name, "address", self._client_mac(ap_interface)], timeout=10)
+        self.runner.run(["nmcli", "device", "set", name, "managed", "yes"], timeout=10)
+        self.runner.run(["ip", "link", "set", name, "up"], timeout=10, check=True)
+        self.client_interface = name
+        return WirelessInterface(name=name)
+
     def scan_wifi(self) -> list[WifiNetwork]:
-        result = self.runner.run(
-            [
-                "nmcli",
-                "-t",
-                "-f",
-                "IN-USE,SSID,SIGNAL,SECURITY,FREQ",
-                "device",
-                "wifi",
-                "list",
-                "--rescan",
-                "yes",
-            ],
-            timeout=20,
-            check=True,
-        )
+        args = [
+            "nmcli",
+            "-t",
+            "-f",
+            "IN-USE,SSID,SIGNAL,SECURITY,FREQ",
+            "device",
+            "wifi",
+            "list",
+        ]
+        if self.client_interface:
+            args.extend(["ifname", self.client_interface])
+        args.extend(["--rescan", "yes"])
+        result = self.runner.run(args, timeout=20, check=True)
         return parse_nmcli_wifi_list(result.stdout)
 
     def connect_wifi(self, ssid: str, password: str, interface: str | None = None) -> bool:
@@ -164,6 +173,8 @@ class NetworkManagerClient:
         if interface:
             args.extend(["ifname", interface])
         result = self.runner.run(args, timeout=60)
+        if result.ok and interface:
+            self._allow_active_connection_on_any_interface(interface)
         return result.ok
 
     def device_status(self) -> list[dict[str, str]]:
@@ -176,6 +187,36 @@ class NetworkManagerClient:
             if len(fields) >= 3:
                 devices.append({"device": fields[0], "type": fields[1], "state": fields[2]})
         return devices
+
+    def _interface_exists(self, interface: str) -> bool:
+        return self.runner.run(["ip", "link", "show", "dev", interface], timeout=5).ok
+
+    def _client_mac(self, ap_interface: str) -> str:
+        try:
+            raw_mac = Path(f"/sys/class/net/{ap_interface}/address").read_text(encoding="utf-8").strip()
+        except OSError:
+            raw_mac = "02:00:00:00:00:01"
+        parts = raw_mac.split(":")
+        if len(parts) != 6:
+            return "02:00:00:00:00:01"
+        try:
+            bytes_ = [int(part, 16) for part in parts]
+        except ValueError:
+            return "02:00:00:00:00:01"
+        bytes_[0] = (bytes_[0] | 0x02) & 0xFE
+        bytes_[-1] = (bytes_[-1] + 1) % 256
+        return ":".join(f"{byte:02x}" for byte in bytes_)
+
+    def _allow_active_connection_on_any_interface(self, interface: str) -> None:
+        result = self.runner.run(["nmcli", "-t", "-f", "NAME,DEVICE", "connection", "show", "--active"], timeout=10)
+        if not result.ok:
+            return
+        for line in result.stdout.splitlines():
+            fields = _split_nmcli_fields(line)
+            if len(fields) >= 2 and fields[1] == interface and fields[0]:
+                self.runner.run(["nmcli", "connection", "modify", fields[0], "connection.interface-name", ""], timeout=10)
+                self.runner.run(["nmcli", "connection", "modify", fields[0], "connection.autoconnect", "yes"], timeout=10)
+                return
 
 
 class NetworkProbe:
