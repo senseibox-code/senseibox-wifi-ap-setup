@@ -29,6 +29,9 @@ class FakeNetworkManager:
             )
         ]
 
+    def device_status(self) -> list[dict[str, str]]:
+        return []
+
 
 class FakeAccessPointManager:
     def __init__(self) -> None:
@@ -87,3 +90,26 @@ def test_setup_mode_caches_wifi_scan_before_ap_handoff(tmp_path: Path, monkeypat
 
     cached = service.network_cache.read()
     assert [network.ssid for network in cached] == ["Senseibox Lab"]
+
+
+def test_complete_setup_mode_moves_validated_connection_to_ap_interface(tmp_path: Path, monkeypatch):
+    monkeypatch.setenv("SENSEIBOX_AP_GATEWAY", "setup-gateway")
+    monkeypatch.setenv("SENSEIBOX_AP_DHCP_START", "setup-start")
+    monkeypatch.setenv("SENSEIBOX_AP_DHCP_END", "setup-end")
+    monkeypatch.setenv("SENSEIBOX_AP_PASSPHRASE", "setup-password")
+    interface = WirelessInterface("wlan0", "phy0")
+    network_manager = FakeNetworkManager(interface)
+    ap_manager = FakeAccessPointManager()
+    service = WifiSetupService(
+        state_dir=tmp_path,
+        network_manager=network_manager,
+        ap_manager=ap_manager,
+    )
+    service.prepare_setup_mode()
+
+    service.complete_setup_mode()
+
+    assert service.state.name == "setup_complete"
+    assert service.state.ap_interface is None
+    assert service.state.client_interface == WirelessInterface("sta0", "phy0")
+    assert ap_manager.stopped == ["wlan0", "wlan0"]

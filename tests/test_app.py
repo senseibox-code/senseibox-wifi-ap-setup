@@ -31,12 +31,14 @@ class EmptyNetworkManager:
 class ConnectTrackingNetworkManager:
     def __init__(self) -> None:
         self.connected_with: tuple[str, str, str | None] | None = None
+        self.last_connection_name: str | None = None
 
     def scan_wifi(self):
         return []
 
     def connect_wifi(self, ssid: str, password: str, interface: str | None = None) -> bool:
         self.connected_with = (ssid, password, interface)
+        self.last_connection_name = ssid
         return True
 
     def select_ap_interface(self):

@@ -1,11 +1,26 @@
 from __future__ import annotations
 
 from senseibox_wifi_ap_mode.network import (
+    NetworkManagerClient,
     parse_iw_dev,
     parse_iw_supported_modes,
     parse_nmcli_wifi_list,
     select_ap_interface,
 )
+from senseibox_wifi_ap_mode.commands import CommandResult
+
+
+class RecordingRunner:
+    def __init__(self, responses: dict[tuple[str, ...], CommandResult] | None = None) -> None:
+        self.commands: list[tuple[str, ...]] = []
+        self.responses = responses or {}
+
+    def run(self, args, *, timeout: int = 10, check: bool = False):
+        _ = timeout
+        _ = check
+        command = tuple(args)
+        self.commands.append(command)
+        return self.responses.get(command, CommandResult(command, 0, "", ""))
 
 
 def test_selects_first_wireless_interface_with_ap_support():
@@ -72,3 +87,20 @@ def test_nmcli_wifi_list_deduplicates_and_sorts_by_signal():
     assert networks[0].security == "WPA2"
     assert networks[1].connected is True
     assert networks[2].security == "open"
+
+
+def test_connect_wifi_unbinds_validated_profile_from_client_interface():
+    active_command = ("nmcli", "-t", "-f", "NAME,DEVICE", "connection", "show", "--active")
+    runner = RecordingRunner(
+        {
+            active_command: CommandResult(active_command, 0, "Home Network:sta0\n", ""),
+        }
+    )
+    network_manager = NetworkManagerClient(runner)
+
+    connected = network_manager.connect_wifi("Home Network", "test-password", "sta0")
+
+    assert connected is True
+    assert network_manager.last_connection_name == "Home Network"
+    assert ("nmcli", "connection", "modify", "Home Network", "connection.interface-name", "") in runner.commands
+    assert ("nmcli", "connection", "modify", "Home Network", "connection.autoconnect", "yes") in runner.commands

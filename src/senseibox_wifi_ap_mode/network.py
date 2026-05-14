@@ -124,6 +124,7 @@ class NetworkManagerClient:
     def __init__(self, runner: CommandRunner | None = None) -> None:
         self.runner = runner or CommandRunner()
         self.client_interface: str | None = None
+        self.last_connection_name: str | None = None
 
     def wireless_interfaces(self) -> list[WirelessInterface]:
         result = self.runner.run(["iw", "dev"], timeout=5)
@@ -180,7 +181,7 @@ class NetworkManagerClient:
             args.extend(["ifname", interface])
         result = self.runner.run(args, timeout=60)
         if result.ok and interface:
-            self._allow_active_connection_on_any_interface(interface)
+            self.last_connection_name = self._allow_active_connection_on_any_interface(interface)
         return result.ok
 
     def device_status(self) -> list[dict[str, str]]:
@@ -213,16 +214,26 @@ class NetworkManagerClient:
         bytes_[-1] = (bytes_[-1] + 1) % 256
         return ":".join(f"{byte:02x}" for byte in bytes_)
 
-    def _allow_active_connection_on_any_interface(self, interface: str) -> None:
+    def _active_connection_name(self, interface: str) -> str | None:
         result = self.runner.run(["nmcli", "-t", "-f", "NAME,DEVICE", "connection", "show", "--active"], timeout=10)
         if not result.ok:
-            return
+            return None
         for line in result.stdout.splitlines():
             fields = _split_nmcli_fields(line)
             if len(fields) >= 2 and fields[1] == interface and fields[0]:
-                self.runner.run(["nmcli", "connection", "modify", fields[0], "connection.interface-name", ""], timeout=10)
-                self.runner.run(["nmcli", "connection", "modify", fields[0], "connection.autoconnect", "yes"], timeout=10)
-                return
+                return fields[0]
+        return None
+
+    def _allow_active_connection_on_any_interface(self, interface: str) -> str | None:
+        connection_name = self._active_connection_name(interface)
+        if not connection_name:
+            return None
+        self._allow_connection_on_any_interface(connection_name)
+        return connection_name
+
+    def _allow_connection_on_any_interface(self, connection_name: str) -> None:
+        self.runner.run(["nmcli", "connection", "modify", connection_name, "connection.interface-name", ""], timeout=10)
+        self.runner.run(["nmcli", "connection", "modify", connection_name, "connection.autoconnect", "yes"], timeout=10)
 
 
 class NetworkProbe:

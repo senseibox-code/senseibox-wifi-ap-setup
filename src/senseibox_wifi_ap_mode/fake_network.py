@@ -9,6 +9,7 @@ class FakeNetworkManagerClient:
 
     def __init__(self, scan_delay_seconds: float = 6) -> None:
         self.scan_delay_seconds = scan_delay_seconds
+        self.last_connection_name: str | None = None
 
     def scan_wifi(self) -> list[WifiNetwork]:
         return [
@@ -75,4 +76,7 @@ class FakeNetworkManagerClient:
 
     def connect_wifi(self, ssid: str, password: str, interface: str | None = None) -> bool:
         _ = interface
-        return bool(ssid and password and password != "wrong-password")
+        connected = bool(ssid and password and password != "wrong-password")
+        if connected:
+            self.last_connection_name = ssid
+        return connected
