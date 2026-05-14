@@ -34,6 +34,27 @@ Wiphy phy1
     assert selected.phy == "phy1"
 
 
+def test_ap_selection_skips_reserved_client_interface():
+    iw_dev = """
+phy#0
+	Interface sta0
+		type managed
+	Interface wlan0
+		type managed
+"""
+    iw_list = """
+Wiphy phy0
+	Supported interface modes:
+		 * managed
+		 * AP
+"""
+
+    selected = select_ap_interface(parse_iw_dev(iw_dev), parse_iw_supported_modes(iw_list))
+
+    assert selected is not None
+    assert selected.name == "wlan0"
+
+
 def test_nmcli_wifi_list_deduplicates_and_sorts_by_signal():
     output = "\n".join(
         [

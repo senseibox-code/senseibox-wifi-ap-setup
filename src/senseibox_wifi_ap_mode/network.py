@@ -5,6 +5,8 @@ from pathlib import Path
 
 from .commands import CommandRunner
 
+CLIENT_INTERFACE_NAME = "sta0"
+
 
 @dataclass(frozen=True)
 class WirelessInterface:
@@ -63,6 +65,8 @@ def select_ap_interface(
     supported_modes: dict[str | None, set[str]],
 ) -> WirelessInterface | None:
     for interface in interfaces:
+        if interface.name == CLIENT_INTERFACE_NAME:
+            continue
         modes = supported_modes.get(interface.phy) or supported_modes.get(None) or set()
         if "AP" in modes:
             return interface
@@ -143,7 +147,9 @@ class NetworkManagerClient:
             check=True,
         )
 
-    def create_client_interface(self, ap_interface: str, *, name: str = "sta0") -> WirelessInterface:
+    def create_client_interface(self, ap_interface: str, *, name: str = CLIENT_INTERFACE_NAME) -> WirelessInterface:
+        if ap_interface == name:
+            raise RuntimeError(f"{name} is reserved for Wi-Fi client validation.")
         if not self._interface_exists(name):
             self.runner.run(["iw", "dev", ap_interface, "interface", "add", name, "type", "managed"], timeout=10, check=True)
             self.runner.run(["ip", "link", "set", "dev", name, "address", self._client_mac(ap_interface)], timeout=10)
