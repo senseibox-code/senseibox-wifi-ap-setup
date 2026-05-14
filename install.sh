@@ -98,10 +98,12 @@ else
     --exclude "*.pyc" \
     --exclude ".pytest_cache" \
     --exclude ".DS_Store" \
+    --exclude "state" \
     "${SCRIPT_DIR}/" "${INSTALL_DIR}/"
 fi
 
 chown -R "${SERVICE_USER}:${SERVICE_GROUP}" "${INSTALL_ROOT}"
+install -d -o "${SERVICE_USER}" -g "${SERVICE_GROUP}" "${INSTALL_DIR}/state"
 
 sudo -u "${SERVICE_USER}" python3 -m venv "${INSTALL_DIR}/.venv"
 sudo -u "${SERVICE_USER}" "${INSTALL_DIR}/.venv/bin/python" -m pip install --upgrade pip
