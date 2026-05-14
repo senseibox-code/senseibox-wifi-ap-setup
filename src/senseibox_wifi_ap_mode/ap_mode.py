@@ -173,7 +173,11 @@ class AccessPointManager:
 
         try:
             self.runner.run(
-                ["dnsmasq", "--conf-file", str(self.dnsmasq_config_path), "--pid-file", str(self.dnsmasq_pid_path)],
+                [
+                    "dnsmasq",
+                    f"--conf-file={self.dnsmasq_config_path}",
+                    f"--pid-file={self.dnsmasq_pid_path}",
+                ],
                 timeout=10,
                 check=True,
             )

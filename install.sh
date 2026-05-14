@@ -74,10 +74,9 @@ if [ ! -f "${ENV_FILE}" ]; then
   install -m 0600 /dev/null "${ENV_FILE}"
   {
     echo "# Senseibox Wi-Fi setup AP configuration"
-    echo "# Set these before hardware AP testing:"
-    echo "# SENSEIBOX_AP_GATEWAY="
-    echo "# SENSEIBOX_AP_DHCP_START="
-    echo "# SENSEIBOX_AP_DHCP_END="
+    echo "SENSEIBOX_AP_GATEWAY=\"192.168.4.1\""
+    echo "SENSEIBOX_AP_DHCP_START=\"192.168.4.10\""
+    echo "SENSEIBOX_AP_DHCP_END=\"192.168.4.100\""
     echo "SENSEIBOX_AP_SSID=\"Senseibox Setup\""
     echo "SENSEIBOX_AP_COUNTRY=\"GB\""
     echo "SENSEIBOX_AP_CHANNEL=\"6\""
@@ -96,6 +95,7 @@ else
     --exclude ".venv" \
     --exclude "__pycache__" \
     --exclude "*.pyc" \
+    --exclude "._*" \
     --exclude ".pytest_cache" \
     --exclude ".DS_Store" \
     --exclude "state" \
@@ -114,4 +114,4 @@ systemctl daemon-reload
 systemctl enable --now "${SERVICE_NAME}"
 
 echo "${APP_NAME} is installed."
-systemctl --no-pager --full status "${SERVICE_NAME}"
+systemctl --no-pager --full status "${SERVICE_NAME}" || true

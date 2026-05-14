@@ -10,7 +10,7 @@ Group=senseibox
 WorkingDirectory=/opt/senseibox/senseibox-wifi-ap-mode
 Environment=PYTHONUNBUFFERED=1
 EnvironmentFile=-/etc/senseibox/senseibox-wifi-ap-mode
-ExecStart=/opt/senseibox/senseibox-wifi-ap-mode/.venv/bin/senseibox-wifi-ap-mode --boot --host 0.0.0.0 --port 8080
+ExecStart=/opt/senseibox/senseibox-wifi-ap-mode/.venv/bin/senseibox-wifi-ap-mode --boot --host 0.0.0.0 --port 80
 Restart=always
 RestartPreventExitStatus=0
 RestartSec=5

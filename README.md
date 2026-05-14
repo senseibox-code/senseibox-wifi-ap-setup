@@ -9,7 +9,7 @@ Wi-Fi onboarding service for Senseibox. It starts a local setup page in access p
 On boot, systemd starts:
 
 ```sh
-senseibox-wifi-ap-mode --boot --host 0.0.0.0 --port 8080
+senseibox-wifi-ap-mode --boot --host 0.0.0.0 --port 80
 ```
 
 In `--boot` mode the service does this:
@@ -57,13 +57,19 @@ The installer does the setup in these steps:
 6. Installs the Python app into that virtualenv.
 7. Installs and starts the `senseibox-wifi-ap-mode` systemd service.
 
-AP setup mode reads deployment-specific settings from `/etc/senseibox/senseibox-wifi-ap-mode`. Before hardware AP testing, set the setup gateway and DHCP range there:
+AP setup mode reads deployment-specific settings from `/etc/senseibox/senseibox-wifi-ap-mode`:
 
 ```sh
 sudoedit /etc/senseibox/senseibox-wifi-ap-mode
 ```
 
-The installer creates this file with the required variable names commented out so product-specific network values are not baked into the repository.
+The installer creates this file with the default isolated setup network:
+
+```sh
+SENSEIBOX_AP_GATEWAY="192.168.4.1"
+SENSEIBOX_AP_DHCP_START="192.168.4.10"
+SENSEIBOX_AP_DHCP_END="192.168.4.100"
+```
 
 Setup AP mode shuts down automatically if setup is not completed. The default timeout is 10 minutes and can be changed in `/etc/senseibox/senseibox-wifi-ap-mode`:
 
@@ -71,10 +77,10 @@ Setup AP mode shuts down automatically if setup is not completed. The default ti
 SENSEIBOX_SETUP_TIMEOUT_SECONDS="600"
 ```
 
-The setup page listens on port `8080`:
+In AP setup mode, the setup page listens on port `80`:
 
 ```text
-http://<senseibox-host>:8080/
+http://192.168.4.1/
 ```
 
 ## Operations
@@ -126,7 +132,7 @@ Boot mode exits when wired or Wi-Fi networking is already healthy. If setup is n
 Manual recovery can force setup mode:
 
 ```sh
-sudo /opt/senseibox/senseibox-wifi-ap-mode/.venv/bin/senseibox-wifi-ap-mode --host 0.0.0.0 --port 8080
+sudo /opt/senseibox/senseibox-wifi-ap-mode/.venv/bin/senseibox-wifi-ap-mode --host 0.0.0.0 --port 80
 ```
 
 For local development without AP control:
