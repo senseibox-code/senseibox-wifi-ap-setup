@@ -4,6 +4,23 @@ Wi-Fi onboarding service for Senseibox. It starts a local setup page in access p
 
 ![Senseibox Wi-Fi AP mode onboarding screens](static/assets/senseibox_wifi_ap_mode.png)
 
+## How it works
+
+On boot, systemd starts:
+
+```sh
+senseibox-wifi-ap-mode --boot --host 0.0.0.0 --port 8080
+```
+
+In `--boot` mode the service does this:
+
+1. Checks NetworkManager device status.
+2. If any Ethernet device is connected and has an IPv4 address, it exits.
+3. If any Wi-Fi device is connected, has an IPv4 address, and has a default route, it exits.
+4. It retries this for up to about 30 seconds: 6 attempts, 5 seconds apart.
+5. Only if no usable wired or Wi-Fi connection is found does it start AP mode and expose the setup SSID.
+6. If a Wi-Fi profile exists but fails to connect, or connects without a default route, then it will start setup AP mode.
+
 ## Install
 
 ```sh
