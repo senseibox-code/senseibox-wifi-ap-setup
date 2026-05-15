@@ -90,10 +90,19 @@ def test_nmcli_wifi_list_deduplicates_and_sorts_by_signal():
 
 
 def test_connect_wifi_unbinds_validated_profile_from_client_interface():
+    network_manager = NetworkManagerClient(RecordingRunner())
+    connection_name = network_manager._setup_connection_name("Home Network")
     active_command = ("nmcli", "-t", "-f", "NAME,DEVICE", "connection", "show", "--active")
+    saved_connections_command = ("nmcli", "-t", "-f", "NAME,802-11-wireless.ssid", "connection", "show")
     runner = RecordingRunner(
         {
-            active_command: CommandResult(active_command, 0, "Home Network:sta0\n", ""),
+            active_command: CommandResult(active_command, 0, f"{connection_name}:sta0\n", ""),
+            saved_connections_command: CommandResult(
+                saved_connections_command,
+                0,
+                f"{connection_name}:Home Network\nBroken Home Network:Home Network\nWired:\n",
+                "",
+            ),
         }
     )
     network_manager = NetworkManagerClient(runner)
@@ -101,6 +110,21 @@ def test_connect_wifi_unbinds_validated_profile_from_client_interface():
     connected = network_manager.connect_wifi("Home Network", "test-password", "sta0")
 
     assert connected is True
-    assert network_manager.last_connection_name == "Home Network"
-    assert ("nmcli", "connection", "modify", "Home Network", "connection.interface-name", "") in runner.commands
-    assert ("nmcli", "connection", "modify", "Home Network", "connection.autoconnect", "yes") in runner.commands
+    assert network_manager.last_connection_name == connection_name
+    assert ("nmcli", "connection", "delete", connection_name) in runner.commands
+    assert (
+        "nmcli",
+        "device",
+        "wifi",
+        "connect",
+        "Home Network",
+        "password",
+        "test-password",
+        "ifname",
+        "sta0",
+        "name",
+        connection_name,
+    ) in runner.commands
+    assert ("nmcli", "connection", "modify", connection_name, "connection.interface-name", "") in runner.commands
+    assert ("nmcli", "connection", "modify", connection_name, "connection.autoconnect", "yes") in runner.commands
+    assert ("nmcli", "connection", "delete", "Broken Home Network") in runner.commands

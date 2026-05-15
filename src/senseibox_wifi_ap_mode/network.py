@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import hashlib
 from pathlib import Path
 
 from .commands import CommandRunner
 
 CLIENT_INTERFACE_NAME = "sta0"
+SETUP_CONNECTION_PREFIX = "senseibox-wifi-"
 
 
 @dataclass(frozen=True)
@@ -176,12 +178,18 @@ class NetworkManagerClient:
         return parse_nmcli_wifi_list(result.stdout)
 
     def connect_wifi(self, ssid: str, password: str, interface: str | None = None) -> bool:
+        connection_name = self._setup_connection_name(ssid) if interface else None
+        if connection_name:
+            self.runner.run(["nmcli", "connection", "delete", connection_name], timeout=10)
         args = ["nmcli", "device", "wifi", "connect", ssid, "password", password]
         if interface:
             args.extend(["ifname", interface])
+        if connection_name:
+            args.extend(["name", connection_name])
         result = self.runner.run(args, timeout=60)
         if result.ok and interface:
             self.last_connection_name = self._allow_active_connection_on_any_interface(interface)
+            self._remove_other_wifi_connections_for_ssid(ssid, self.last_connection_name or connection_name)
         return result.ok
 
     def device_status(self) -> list[dict[str, str]]:
@@ -234,6 +242,19 @@ class NetworkManagerClient:
     def _allow_connection_on_any_interface(self, connection_name: str) -> None:
         self.runner.run(["nmcli", "connection", "modify", connection_name, "connection.interface-name", ""], timeout=10)
         self.runner.run(["nmcli", "connection", "modify", connection_name, "connection.autoconnect", "yes"], timeout=10)
+
+    def _remove_other_wifi_connections_for_ssid(self, ssid: str, keep_connection_name: str) -> None:
+        result = self.runner.run(["nmcli", "-t", "-f", "NAME,802-11-wireless.ssid", "connection", "show"], timeout=10)
+        if not result.ok:
+            return
+        for line in result.stdout.splitlines():
+            fields = _split_nmcli_fields(line)
+            if len(fields) >= 2 and fields[1] == ssid and fields[0] and fields[0] != keep_connection_name:
+                self.runner.run(["nmcli", "connection", "delete", fields[0]], timeout=10)
+
+    def _setup_connection_name(self, ssid: str) -> str:
+        digest = hashlib.sha256(ssid.encode("utf-8")).hexdigest()[:12]
+        return f"{SETUP_CONNECTION_PREFIX}{digest}"
 
 
 class NetworkProbe:
